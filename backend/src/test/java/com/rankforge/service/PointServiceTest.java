@@ -13,6 +13,7 @@ import com.rankforge.exception.InsufficientPointsException;
 import com.rankforge.mapper.PointTransactionMapper;
 import com.rankforge.repository.PointTransactionRepository;
 import com.rankforge.repository.StudentProfileRepository;
+import com.rankforge.service.impl.PointAdjustmentExecutor;
 import com.rankforge.service.impl.PointServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -43,6 +44,7 @@ class PointServiceTest {
 
     private PointTransactionMapper pointTransactionMapper;
     private AppProperties appProperties;
+    private PointAdjustmentExecutor pointAdjustmentExecutor;
     private PointServiceImpl pointService;
 
     private User teacherUser;
@@ -55,10 +57,14 @@ class PointServiceTest {
         appProperties = new AppProperties();
         appProperties.getPoints().setMaxPerTransaction(1000);
 
-        pointService = new PointServiceImpl(
+        pointAdjustmentExecutor = new PointAdjustmentExecutor(
                 studentProfileRepository,
                 pointTransactionRepository,
-                pointTransactionMapper,
+                pointTransactionMapper
+        );
+
+        pointService = new PointServiceImpl(
+                pointAdjustmentExecutor,
                 appProperties
         );
 
@@ -72,27 +78,27 @@ class PointServiceTest {
     @DisplayName("Teacher can award points, updating total balance and creating transaction")
     void teacherAwardsPointsSuccess() {
         UUID studentId = studentProfile.getId();
-        when(studentProfileRepository.findById(studentId)).thenReturn(Optional.of(studentProfile));
-        when(pointTransactionRepository.save(any(PointTransaction.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(studentProfileRepository.findWithUserById(studentId)).thenReturn(Optional.of(studentProfile));
+        when(pointTransactionRepository.saveAndFlush(any(PointTransaction.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        PointAdjustmentRequest request = new PointAdjustmentRequest(25, "Excellent performance in potions");
+        PointAdjustmentRequest request = new PointAdjustmentRequest(25, "Excellent academic achievement");
         PointTransactionResponse response = pointService.adjustPoints(studentId, teacherUser, request);
 
         assertNotNull(response);
         assertEquals(75L, studentProfile.getTotalPoints());
         assertEquals(25, response.deltaPoints());
-        assertEquals("Excellent performance in potions", response.reason());
+        assertEquals("Excellent academic achievement", response.reason());
 
-        verify(studentProfileRepository).save(studentProfile);
-        verify(pointTransactionRepository).save(any(PointTransaction.class));
+        verify(studentProfileRepository).saveAndFlush(studentProfile);
+        verify(pointTransactionRepository).saveAndFlush(any(PointTransaction.class));
     }
 
     @Test
     @DisplayName("Teacher can deduct points when balance is sufficient")
     void teacherDeductsPointsSuccess() {
         UUID studentId = studentProfile.getId();
-        when(studentProfileRepository.findById(studentId)).thenReturn(Optional.of(studentProfile));
-        when(pointTransactionRepository.save(any(PointTransaction.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(studentProfileRepository.findWithUserById(studentId)).thenReturn(Optional.of(studentProfile));
+        when(pointTransactionRepository.saveAndFlush(any(PointTransaction.class))).thenAnswer(inv -> inv.getArgument(0));
 
         PointAdjustmentRequest request = new PointAdjustmentRequest(-20, "Late assignment submission");
         PointTransactionResponse response = pointService.adjustPoints(studentId, teacherUser, request);
@@ -101,8 +107,8 @@ class PointServiceTest {
         assertEquals(30L, studentProfile.getTotalPoints());
         assertEquals(-20, response.deltaPoints());
 
-        verify(studentProfileRepository).save(studentProfile);
-        verify(pointTransactionRepository).save(any(PointTransaction.class));
+        verify(studentProfileRepository).saveAndFlush(studentProfile);
+        verify(pointTransactionRepository).saveAndFlush(any(PointTransaction.class));
     }
 
     @Test
@@ -113,8 +119,8 @@ class PointServiceTest {
 
         assertThrows(ForbiddenException.class, () -> pointService.adjustPoints(studentId, studentUser, request));
 
-        verify(studentProfileRepository, never()).save(any());
-        verify(pointTransactionRepository, never()).save(any());
+        verify(studentProfileRepository, never()).saveAndFlush(any());
+        verify(pointTransactionRepository, never()).saveAndFlush(any());
     }
 
     @Test
@@ -125,8 +131,8 @@ class PointServiceTest {
 
         assertThrows(BadRequestException.class, () -> pointService.adjustPoints(studentId, teacherUser, request));
 
-        verify(studentProfileRepository, never()).save(any());
-        verify(pointTransactionRepository, never()).save(any());
+        verify(studentProfileRepository, never()).saveAndFlush(any());
+        verify(pointTransactionRepository, never()).saveAndFlush(any());
     }
 
     @Test
@@ -137,8 +143,8 @@ class PointServiceTest {
 
         assertThrows(BadRequestException.class, () -> pointService.adjustPoints(studentId, teacherUser, request));
 
-        verify(studentProfileRepository, never()).save(any());
-        verify(pointTransactionRepository, never()).save(any());
+        verify(studentProfileRepository, never()).saveAndFlush(any());
+        verify(pointTransactionRepository, never()).saveAndFlush(any());
     }
 
     @Test
@@ -146,7 +152,7 @@ class PointServiceTest {
     void rejectsDeductionResultingInNegativeBalance() {
         UUID studentId = studentProfile.getId();
         studentProfile.setTotalPoints(15L);
-        when(studentProfileRepository.findById(studentId)).thenReturn(Optional.of(studentProfile));
+        when(studentProfileRepository.findWithUserById(studentId)).thenReturn(Optional.of(studentProfile));
 
         PointAdjustmentRequest request = new PointAdjustmentRequest(-20, "Deducting more than balance");
 
@@ -154,6 +160,6 @@ class PointServiceTest {
 
         // Balance remains unchanged at 15
         assertEquals(15L, studentProfile.getTotalPoints());
-        verify(pointTransactionRepository, never()).save(any());
+        verify(pointTransactionRepository, never()).saveAndFlush(any());
     }
 }

@@ -7,6 +7,7 @@ import com.rankforge.entity.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -21,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class RepositoryIntegrationTest {
 
     @Autowired
@@ -31,6 +33,13 @@ class RepositoryIntegrationTest {
 
     @Autowired
     private PointTransactionRepository pointTransactionRepository;
+
+    @org.junit.jupiter.api.BeforeEach
+    void setUp() {
+        pointTransactionRepository.deleteAll();
+        studentProfileRepository.deleteAll();
+        userRepository.deleteAll();
+    }
 
     @Test
     @DisplayName("Persists user and enforces email uniqueness")

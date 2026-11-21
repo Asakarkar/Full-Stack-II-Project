@@ -47,9 +47,7 @@ class AuthServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
-    @Mock
     private JwtService jwtService;
-
     private UserMapper userMapper;
     private AppProperties appProperties;
     private AuthServiceImpl authService;
@@ -59,6 +57,9 @@ class AuthServiceTest {
         userMapper = new UserMapper();
         appProperties = new AppProperties();
         appProperties.getTeacher().setInvitationCode("SECRET-TEACHER-CODE-123");
+        appProperties.getJwt().setSecret("dGVzdC1zZWNyZXQta2V5LXNob3VsZC1iZS1hdC1sZWFzdC0yNTYtYml0cy1sb25nLWZvci1oczI1NiE=");
+        appProperties.getJwt().setExpirationMs(3600000L);
+        jwtService = new JwtService(appProperties);
 
         authService = new AuthServiceImpl(
                 userRepository,
@@ -78,13 +79,11 @@ class AuthServiceTest {
         when(userRepository.existsByEmail("student.alpha@example.com")).thenReturn(false);
         when(passwordEncoder.encode("Password123!")).thenReturn("encodedHash123");
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
-        when(jwtService.generateToken(any(User.class))).thenReturn("jwt-token-xyz");
-        when(jwtService.getExpirationSeconds()).thenReturn(3600L);
 
         AuthResponse response = authService.register(request);
 
         assertNotNull(response);
-        assertEquals("jwt-token-xyz", response.accessToken());
+        assertNotNull(response.accessToken());
         assertEquals("Bearer", response.tokenType());
         assertEquals("student.alpha@example.com", response.user().email());
         assertEquals(Role.STUDENT, response.user().role());
@@ -101,15 +100,12 @@ class AuthServiceTest {
         when(userRepository.existsByEmail("teacher.beta@example.com")).thenReturn(false);
         when(passwordEncoder.encode("Password123!")).thenReturn("encodedHash123");
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
-        when(jwtService.generateToken(any(User.class))).thenReturn("jwt-teacher-token");
-        when(jwtService.getExpirationSeconds()).thenReturn(3600L);
 
         AuthResponse response = authService.register(request);
 
         assertNotNull(response);
         assertEquals(Role.TEACHER, response.user().role());
         verify(userRepository).save(any(User.class));
-        // Teachers do not have student profiles created
         verify(studentProfileRepository, never()).save(any(StudentProfile.class));
     }
 
@@ -144,13 +140,11 @@ class AuthServiceTest {
 
         when(userRepository.findByEmail("student.alpha@example.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("Password123!", "hashedPassword")).thenReturn(true);
-        when(jwtService.generateToken(user)).thenReturn("jwt-token-abc");
-        when(jwtService.getExpirationSeconds()).thenReturn(3600L);
 
         AuthResponse response = authService.login(request);
 
         assertNotNull(response);
-        assertEquals("jwt-token-abc", response.accessToken());
+        assertNotNull(response.accessToken());
         assertEquals("student.alpha@example.com", response.user().email());
     }
 
