@@ -4,9 +4,8 @@ import { Link, router } from "expo-router";
 import { Eye, EyeOff } from "lucide-react-native";
 import { Screen, Field, Button } from "@/components/ui";
 import { useTheme } from "@/context/ThemeContext";
-import { useRegisterMutation } from "@/store/api";
 import { useAppDispatch } from "@/store";
-import { establishSession } from "@/store/authSlice";
+import { register } from "@/store/authSlice";
 import { getErrorMessage } from "@/lib/apiConfig";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { AppText as Text } from "@/components/AppText";
@@ -15,13 +14,13 @@ import { getEmailValidationError } from "@/lib/emailValidation";
 export default function RegisterScreen() {
   const { colors } = useTheme();
   const dispatch = useAppDispatch();
-  const [register, { isLoading }] = useRegisterMutation();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [error, setError] = useState("");
   const [emailError, setEmailError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const submit = async () => {
     setError("");
@@ -31,12 +30,21 @@ export default function RegisterScreen() {
       return;
     }
     setEmailError("");
+    setSubmitting(true);
     try {
-      const session = await register({ displayName: name.trim(), email: email.trim(), password }).unwrap();
-      await dispatch(establishSession(session)).unwrap();
+      await dispatch(
+        register({
+          fullName: name.trim(),
+          email: email.trim(),
+          password,
+          role: "STUDENT",
+        })
+      ).unwrap();
       router.replace("/(tabs)");
     } catch (reason) {
       setError(getErrorMessage(reason, "We couldn’t create your account."));
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -50,25 +58,54 @@ export default function RegisterScreen() {
         </Animated.View>
         <Animated.View entering={Platform.OS === "web" ? undefined : FadeInDown.duration(420).delay(100)} style={styles.form}>
           <Field label="Full name" placeholder="Your name" value={name} onChangeText={setName} autoCapitalize="words" maxLength={100} />
-          <Field label="Email address" placeholder="you@school.edu" autoCapitalize="none" keyboardType="email-address" value={email} onChangeText={(value) => { setEmail(value); setEmailError(""); }} maxLength={254} accessibilityHint={emailError || undefined} />
+          <Field
+            label="Email address"
+            placeholder="you@school.edu"
+            autoCapitalize="none"
+            keyboardType="email-address"
+            value={email}
+            onChangeText={(value) => {
+              setEmail(value);
+              setEmailError("");
+            }}
+            maxLength={254}
+            accessibilityHint={emailError || undefined}
+          />
           {!!emailError && <Text accessibilityRole="alert" style={{ color: colors.danger, fontSize: 13 }}>{emailError}</Text>}
           <Field
             label="Password"
-            placeholder="At least 10 characters"
+            placeholder="At least 8 characters"
             secureTextEntry={!passwordVisible}
             value={password}
             onChangeText={setPassword}
             maxLength={72}
-            trailing={<Pressable accessibilityRole="button" accessibilityLabel={passwordVisible ? "Hide password" : "Show password"} accessibilityState={{ expanded: passwordVisible }} hitSlop={6} onPress={() => setPasswordVisible((visible) => !visible)} style={styles.passwordToggle}>{passwordVisible ? <EyeOff size={18} color={colors.muted} /> : <Eye size={18} color={colors.muted} />}</Pressable>}
+            trailing={
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={passwordVisible ? "Hide password" : "Show password"}
+                accessibilityState={{ expanded: passwordVisible }}
+                hitSlop={6}
+                onPress={() => setPasswordVisible((visible) => !visible)}
+                style={styles.passwordToggle}
+              >
+                {passwordVisible ? <EyeOff size={18} color={colors.muted} /> : <Eye size={18} color={colors.muted} />}
+              </Pressable>
+            }
           />
-          <Text style={[styles.passwordHint, { color: colors.muted }]}>Use at least 10 characters. Passwords are limited to 72 UTF-8 bytes by the server.</Text>
+          <Text style={[styles.passwordHint, { color: colors.muted }]}>Use at least 8 characters. Passwords are securely hashed via BCrypt.</Text>
           {!!error && <Text accessibilityRole="alert" style={{ color: colors.danger, fontSize: 13 }}>{error}</Text>}
-          <Button title="Create account" onPress={submit} loading={isLoading} disabled={!name.trim() || !email.trim() || password.length < 10} />
+          <Button title="Create account" onPress={submit} loading={submitting} disabled={!name.trim() || !email.trim() || password.length < 8 || submitting} />
         </Animated.View>
-        <Text style={[styles.teacherInfo, { color: colors.muted }]}>Are you an educator? Teacher access is provisioned by your school. Please contact your RankForge administrator for an invitation.</Text>
+        <Text style={[styles.teacherInfo, { color: colors.muted }]}>
+          Are you an educator? Teacher access is provisioned by your school with an invitation code. Please contact your RankForge administrator.
+        </Text>
         <View style={styles.footer}>
           <Text style={{ color: colors.muted }}>Already have an account? </Text>
-          <Link href="/(auth)/login" asChild><Pressable hitSlop={10}><Text style={{ color: colors.primary, fontWeight: "700" }}>Sign in</Text></Pressable></Link>
+          <Link href="/(auth)/login" asChild>
+            <Pressable hitSlop={10}>
+              <Text style={{ color: colors.primary, fontWeight: "700" }}>Sign in</Text>
+            </Pressable>
+          </Link>
         </View>
       </KeyboardAvoidingView>
     </Screen>

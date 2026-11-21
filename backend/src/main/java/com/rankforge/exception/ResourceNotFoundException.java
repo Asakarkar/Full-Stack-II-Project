@@ -7,3 +7,5 @@ public class ResourceNotFoundException extends ApiException {
         super(HttpStatus.NOT_FOUND, message);
     }
 }
+
+

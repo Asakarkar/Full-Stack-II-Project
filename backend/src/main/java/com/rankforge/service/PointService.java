@@ -9,3 +9,5 @@ import java.util.UUID;
 public interface PointService {
     PointTransactionResponse adjustPoints(UUID studentId, User teacher, PointAdjustmentRequest request);
 }
+
+

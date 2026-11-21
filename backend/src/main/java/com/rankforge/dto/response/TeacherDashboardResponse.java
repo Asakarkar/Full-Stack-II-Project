@@ -9,3 +9,5 @@ public record TeacherDashboardResponse(
         long todayDeductedPoints
 ) {
 }
+
+

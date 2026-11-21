@@ -14,3 +14,5 @@ public record StudentProfileResponse(
         Instant updatedAt
 ) {
 }
+
+

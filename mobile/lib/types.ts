@@ -1,35 +1,63 @@
 export type UserRole = "STUDENT" | "TEACHER";
 
-export function isTeacherRole(role?: UserRole | null) {
+export function isTeacherRole(role?: UserRole | null | string): boolean {
   return role?.toUpperCase() === "TEACHER";
 }
 
-export function isStudentRole(role?: UserRole | null) {
+export function isStudentRole(role?: UserRole | null | string): boolean {
   return role?.toUpperCase() === "STUDENT";
 }
 
 export interface User {
   id: string;
   email: string;
+  fullName: string;
   displayName: string;
   role: UserRole;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface AuthResponse {
   accessToken: string;
   tokenType: string;
-  expiresInSeconds: number;
+  expiresInSeconds?: number;
   user: User;
 }
+
+export type AuthenticationStatus = "IDLE" | "LOADING" | "AUTHENTICATED" | "UNAUTHENTICATED";
 
 export interface Student {
   id: string;
   userId: string;
   displayName: string;
+  fullName?: string;
   email: string;
   grade: string | null;
   pointsBalance: number;
+}
+
+export interface LeaderboardEntry {
+  rank: number;
+  studentId: string;
+  userId?: string;
+  displayName: string;
+  fullName?: string;
+  email?: string;
+  grade?: string | null;
+  points: number;
+  totalPoints?: number;
+  competitionRank?: number;
+  deterministicRank?: number;
+}
+
+export interface PaginationState {
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  isFirst: boolean;
+  isLast: boolean;
 }
 
 export interface PageResult<T> {
@@ -41,6 +69,32 @@ export interface PageResult<T> {
   first?: boolean;
   last?: boolean;
   empty?: boolean;
+}
+
+export interface PageEnvelope<T> {
+  content: T[];
+  pageable?: unknown;
+  totalPages: number;
+  totalElements: number;
+  last: boolean;
+  size: number;
+  number: number;
+  sort?: unknown;
+  numberOfElements: number;
+  first: boolean;
+  empty: boolean;
+}
+
+export interface PointTransaction {
+  id: string;
+  studentId: string;
+  studentName?: string;
+  teacherId: string;
+  teacherName?: string;
+  deltaPoints: number;
+  reason: string;
+  balanceAfter?: number;
+  createdAt: string;
 }
 
 export interface PointEntry {
@@ -101,26 +155,4 @@ export interface StudentAnalytics {
   deducted: number;
   netPoints: number;
   transactionCount: number;
-}
-
-export interface LeaderboardEntry {
-  rank: number;
-  studentId: string;
-  displayName: string;
-  grade?: string | null;
-  points: number;
-}
-
-export interface PageEnvelope<T> {
-  content: T[];
-  pageable?: unknown;
-  totalPages: number;
-  totalElements: number;
-  last: boolean;
-  size: number;
-  number: number;
-  sort?: unknown;
-  numberOfElements: number;
-  first: boolean;
-  empty: boolean;
 }

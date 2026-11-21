@@ -2,7 +2,7 @@ import React, { createContext, PropsWithChildren, useCallback, useContext, useEf
 import { useColorScheme } from "react-native";
 import { preferenceStorage, ThemePreference } from "@/lib/storage";
 
-const palettes = {
+export const palettes = {
   dark: {
     background: "#0C0D16",
     surface: "#151622",
@@ -36,14 +36,18 @@ const palettes = {
 };
 
 export type AppColors = typeof palettes.dark;
-interface ThemeContextValue {
+
+export interface ThemeContextValue {
   colors: AppColors;
   mode: "light" | "dark";
+  isDark: boolean;
   preference: ThemePreference;
   setPreference: (preference: ThemePreference) => Promise<void>;
+  setTheme: (theme: ThemePreference) => Promise<void>;
+  toggleTheme: () => Promise<void>;
 }
 
-const ThemeContext = createContext<ThemeContextValue | null>(null);
+export const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: PropsWithChildren) {
   const systemScheme = useColorScheme();
@@ -59,13 +63,42 @@ export function ThemeProvider({ children }: PropsWithChildren) {
     setPreferenceState(value);
     await preferenceStorage.setTheme(value);
   }, []);
-  const mode = preference === "system" ? (systemScheme === "light" ? "light" : "dark") : preference;
-  const value = useMemo(() => ({ colors: palettes[mode], mode, preference, setPreference }), [mode, preference, setPreference]);
+
+  const setTheme = useCallback(async (value: ThemePreference) => {
+    await setPreference(value);
+  }, [setPreference]);
+
+  const mode: "light" | "dark" = preference === "system"
+    ? (systemScheme === "dark" ? "dark" : "light")
+    : preference;
+
+  const isDark = mode === "dark";
+
+  const toggleTheme = useCallback(async () => {
+    const nextMode: ThemePreference = mode === "dark" ? "light" : "dark";
+    await setPreference(nextMode);
+  }, [mode, setPreference]);
+
+  const value = useMemo(
+    () => ({
+      colors: palettes[mode],
+      mode,
+      isDark,
+      preference,
+      setPreference,
+      setTheme,
+      toggleTheme,
+    }),
+    [mode, isDark, preference, setPreference, setTheme, toggleTheme]
+  );
+
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
-export function useTheme() {
+export function useTheme(): ThemeContextValue {
   const value = useContext(ThemeContext);
-  if (!value) throw new Error("useTheme must be used within ThemeProvider");
+  if (!value) {
+    throw new Error("useTheme must be used within ThemeProvider");
+  }
   return value;
 }

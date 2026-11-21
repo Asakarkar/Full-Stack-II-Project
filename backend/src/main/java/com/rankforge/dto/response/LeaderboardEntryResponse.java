@@ -10,3 +10,5 @@ public record LeaderboardEntryResponse(
         Long totalPoints
 ) {
 }
+
+

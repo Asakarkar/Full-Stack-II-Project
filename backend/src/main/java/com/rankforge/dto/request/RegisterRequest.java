@@ -24,3 +24,5 @@ public record RegisterRequest(
         String invitationCode
 ) {
 }
+
+

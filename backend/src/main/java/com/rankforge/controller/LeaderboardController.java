@@ -36,4 +36,14 @@ public class LeaderboardController {
         LeaderboardEntryResponse response = leaderboardService.getMyRank(currentUser);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/activity")
+    public ResponseEntity<PagedResponse<com.rankforge.dto.response.PointTransactionResponse>> getRecentActivity(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "15") int size) {
+        PagedResponse<com.rankforge.dto.response.PointTransactionResponse> response = leaderboardService.getRecentActivity(page, size);
+        return ResponseEntity.ok(response);
+    }
 }
+
+

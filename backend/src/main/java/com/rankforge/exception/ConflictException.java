@@ -7,3 +7,5 @@ public class ConflictException extends ApiException {
         super(HttpStatus.CONFLICT, message);
     }
 }
+
+

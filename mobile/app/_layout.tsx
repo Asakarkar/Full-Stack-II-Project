@@ -21,23 +21,34 @@ import { Sparkles } from "lucide-react-native";
 
 function AppNavigation() {
   const dispatch = useAppDispatch();
-  const { initialized, user } = useAppSelector((state) => state.auth);
+  const { initialized, user, authenticationStatus } = useAppSelector((state) => state.auth);
   const { colors, mode } = useTheme();
 
   useEffect(() => {
     dispatch(restoreSession());
   }, [dispatch]);
 
-  if (!initialized) return <BootSplash />;
+  // Show splash while loading credentials or initial authentication check
+  if (!initialized || authenticationStatus === "LOADING") {
+    return <BootSplash />;
+  }
+
+  const isAuthenticated = authenticationStatus === "AUTHENTICATED" && !!user;
 
   return (
     <>
       <StatusBar style={mode === "dark" ? "light" : "dark"} />
-      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background }, animation: "fade" }}>
-        <Stack.Protected guard={!user}>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.background },
+          animation: "fade",
+        }}
+      >
+        <Stack.Protected guard={!isAuthenticated}>
           <Stack.Screen name="(auth)" />
         </Stack.Protected>
-        <Stack.Protected guard={!!user}>
+        <Stack.Protected guard={isAuthenticated}>
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="profile-edit" />
           <Stack.Screen name="teacher/student/[studentId]" />
@@ -49,11 +60,19 @@ function AppNavigation() {
 
 function BootSplash() {
   const { colors } = useTheme();
-  return <View style={[styles.splash, { backgroundColor: colors.background }]}>
-    <Animated.View entering={FadeIn.duration(450)} style={[styles.logoMark, { backgroundColor: colors.primarySoft }]}><Sparkles size={30} color={colors.primary} /></Animated.View>
-    <Animated.Text entering={FadeInDown.duration(420).delay(90)} style={[styles.logoText, { color: colors.text }]}>RankForge</Animated.Text>
-    <Animated.Text entering={FadeIn.duration(350).delay(200)} style={[styles.logoTagline, { color: colors.muted }]}>Make every learning win count.</Animated.Text>
-  </View>;
+  return (
+    <View style={[styles.splash, { backgroundColor: colors.background }]}>
+      <Animated.View entering={FadeIn.duration(450)} style={[styles.logoMark, { backgroundColor: colors.primarySoft }]}>
+        <Sparkles size={30} color={colors.primary} />
+      </Animated.View>
+      <Animated.Text entering={FadeInDown.duration(420).delay(90)} style={[styles.logoText, { color: colors.text }]}>
+        RankForge
+      </Animated.Text>
+      <Animated.Text entering={FadeIn.duration(350).delay(200)} style={[styles.logoTagline, { color: colors.muted }]}>
+        Make every learning win count.
+      </Animated.Text>
+    </View>
+  );
 }
 
 export default function RootLayout() {
@@ -66,6 +85,7 @@ export default function RootLayout() {
     JetBrainsMono_400Regular,
     JetBrainsMono_700Bold,
   });
+
   return (
     <Provider store={store}>
       <SafeAreaProvider>

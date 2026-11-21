@@ -12,3 +12,5 @@ public record ErrorResponse(
         Map<String, String> validationDetails
 ) {
 }
+
+

@@ -17,3 +17,5 @@ public record PointAdjustmentRequest(
         String reason
 ) {
 }
+
+

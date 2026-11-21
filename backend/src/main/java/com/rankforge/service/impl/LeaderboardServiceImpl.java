@@ -28,11 +28,17 @@ public class LeaderboardServiceImpl implements LeaderboardService {
 
     private final StudentProfileRepository studentProfileRepository;
     private final StudentProfileMapper studentProfileMapper;
+    private final com.rankforge.repository.PointTransactionRepository pointTransactionRepository;
+    private final com.rankforge.mapper.PointTransactionMapper pointTransactionMapper;
 
     public LeaderboardServiceImpl(StudentProfileRepository studentProfileRepository,
-                                  StudentProfileMapper studentProfileMapper) {
+                                  StudentProfileMapper studentProfileMapper,
+                                  com.rankforge.repository.PointTransactionRepository pointTransactionRepository,
+                                  com.rankforge.mapper.PointTransactionMapper pointTransactionMapper) {
         this.studentProfileRepository = studentProfileRepository;
         this.studentProfileMapper = studentProfileMapper;
+        this.pointTransactionRepository = pointTransactionRepository;
+        this.pointTransactionMapper = pointTransactionMapper;
     }
 
     @Override
@@ -89,4 +95,21 @@ public class LeaderboardServiceImpl implements LeaderboardService {
         long rank = studentProfileRepository.countCompetitionRank(profile.getTotalPoints());
         return studentProfileMapper.toLeaderboardEntry(profile, rank);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public com.rankforge.dto.response.PagedResponse<com.rankforge.dto.response.PointTransactionResponse> getRecentActivity(int page, int size) {
+        if (page < 0) {
+            throw new BadRequestException("Page index cannot be negative");
+        }
+        if (size < 1 || size > 100) {
+            throw new BadRequestException("Page size must be between 1 and 100");
+        }
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<com.rankforge.entity.PointTransaction> txPage = pointTransactionRepository.findAll(pageable);
+        return com.rankforge.dto.response.PagedResponse.from(txPage.map(pointTransactionMapper::toResponse));
+    }
 }
+
+
+

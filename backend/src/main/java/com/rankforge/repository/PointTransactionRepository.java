@@ -36,3 +36,5 @@ public interface PointTransactionRepository extends JpaRepository<PointTransacti
     @Query("SELECT COUNT(pt) FROM PointTransaction pt WHERE pt.student.id = :studentId")
     long countByStudentId(@Param("studentId") UUID studentId);
 }
+
+

@@ -12,3 +12,5 @@ public interface StudentService {
     StudentProfileResponse getStudentById(UUID studentId, User currentUser);
     PagedResponse<PointTransactionResponse> getStudentTransactions(UUID studentId, int page, int size, User currentUser);
 }
+
+

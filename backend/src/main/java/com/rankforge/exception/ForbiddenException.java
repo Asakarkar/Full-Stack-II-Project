@@ -7,3 +7,5 @@ public class ForbiddenException extends ApiException {
         super(HttpStatus.FORBIDDEN, message);
     }
 }
+
+

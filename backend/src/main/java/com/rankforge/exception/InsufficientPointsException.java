@@ -7,3 +7,5 @@ public class InsufficientPointsException extends ApiException {
         super(HttpStatus.CONFLICT, message);
     }
 }
+
+

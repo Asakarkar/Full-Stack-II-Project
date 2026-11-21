@@ -8,3 +8,5 @@ public interface TeacherService {
     TeacherDashboardResponse getDashboard();
     PagedResponse<StudentProfileResponse> searchStudents(String search, int page, int size, String sort);
 }
+
+
