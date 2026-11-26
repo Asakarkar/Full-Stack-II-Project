@@ -7,12 +7,14 @@ import { useTheme } from "@/context/ThemeContext";
 import { useAppDispatch } from "@/store";
 import { login } from "@/store/authSlice";
 import { getErrorMessage } from "@/lib/apiConfig";
+import { useResponsive } from "@/lib/responsive";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import { AppText as Text } from "@/components/AppText";
 import { getEmailValidationError } from "@/lib/emailValidation";
 
 export default function LoginScreen() {
   const { colors } = useTheme();
+  const { isTabletOrDesktop } = useResponsive();
   const dispatch = useAppDispatch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -42,7 +44,7 @@ export default function LoginScreen() {
 
   return (
     <Screen>
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.container}>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={[styles.container, isTabletOrDesktop && styles.containerTablet]}>
         <Animated.View entering={Platform.OS === "web" ? undefined : FadeIn.duration(500)} style={[styles.brandMark, { backgroundColor: colors.primarySoft }]}>
           <Sparkles size={26} color={colors.primary} />
         </Animated.View>
@@ -104,7 +106,8 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", gap: 28, paddingVertical: 26 },
+  container: { flex: 1, justifyContent: "center", gap: 28, paddingVertical: 26, width: "100%" },
+  containerTablet: { maxWidth: 460, alignSelf: "center" },
   brandMark: { width: 58, height: 58, borderRadius: 19, alignItems: "center", justifyContent: "center" },
   eyebrow: { fontSize: 11, fontWeight: "900", letterSpacing: 2.4 },
   title: { fontFamily: "PlusJakartaSans_800ExtraBold", fontSize: 34, fontWeight: "800", letterSpacing: -1 },

@@ -24,7 +24,9 @@ import java.util.Set;
 @Service
 public class LeaderboardServiceImpl implements LeaderboardService {
 
-    private static final Set<String> WHITELISTED_SORT_FIELDS = Set.of("totalPoints", "id");
+    private static final Set<String> WHITELISTED_SORT_FIELDS = Set.of(
+            "totalPoints", "points", "total_points", "id", "displayName", "name", "fullName", "createdAt", "grade"
+    );
 
     private final StudentProfileRepository studentProfileRepository;
     private final StudentProfileMapper studentProfileMapper;
@@ -32,9 +34,9 @@ public class LeaderboardServiceImpl implements LeaderboardService {
     private final com.rankforge.mapper.PointTransactionMapper pointTransactionMapper;
 
     public LeaderboardServiceImpl(StudentProfileRepository studentProfileRepository,
-                                  StudentProfileMapper studentProfileMapper,
-                                  com.rankforge.repository.PointTransactionRepository pointTransactionRepository,
-                                  com.rankforge.mapper.PointTransactionMapper pointTransactionMapper) {
+            StudentProfileMapper studentProfileMapper,
+            com.rankforge.repository.PointTransactionRepository pointTransactionRepository,
+            com.rankforge.mapper.PointTransactionMapper pointTransactionMapper) {
         this.studentProfileRepository = studentProfileRepository;
         this.studentProfileMapper = studentProfileMapper;
         this.pointTransactionRepository = pointTransactionRepository;
@@ -43,7 +45,8 @@ public class LeaderboardServiceImpl implements LeaderboardService {
 
     @Override
     @Transactional(readOnly = true)
-    public PagedResponse<LeaderboardEntryResponse> getLeaderboard(int page, int size, String direction, String sortField) {
+    public PagedResponse<LeaderboardEntryResponse> getLeaderboard(int page, int size, String direction,
+            String sortField) {
         if (page < 0) {
             throw new BadRequestException("Page index cannot be negative");
         }
@@ -51,26 +54,48 @@ public class LeaderboardServiceImpl implements LeaderboardService {
             throw new BadRequestException("Page size must be between 1 and 100");
         }
 
-        String field = (sortField == null || sortField.isBlank()) ? "totalPoints" : sortField.trim();
-        if (!WHITELISTED_SORT_FIELDS.contains(field)) {
-            throw new BadRequestException("Invalid sort field: '" + sortField + "'. Whitelisted fields are: " + WHITELISTED_SORT_FIELDS);
+        String rawField = (sortField == null || sortField.isBlank()) ? "totalPoints" : sortField.trim();
+        String inlineDirection = null;
+        if (rawField.contains(",")) {
+            String[] parts = rawField.split(",", 2);
+            rawField = parts[0].trim();
+            if (parts.length > 1 && !parts[1].isBlank()) {
+                inlineDirection = parts[1].trim();
+            }
         }
+
+        final String fieldToCheck = rawField;
+        boolean isWhitelisted = WHITELISTED_SORT_FIELDS.stream()
+                .anyMatch(wf -> wf.equalsIgnoreCase(fieldToCheck));
+        if (!isWhitelisted) {
+            throw new BadRequestException(
+                    "Invalid sort field: '" + sortField + "'. Whitelisted fields are: " + WHITELISTED_SORT_FIELDS);
+        }
+
+        String effectiveDirection = (direction != null && !direction.isBlank())
+                ? direction.trim()
+                : (inlineDirection != null ? inlineDirection : "DESC");
 
         Sort.Direction sortDirection;
         try {
-            sortDirection = (direction == null || direction.isBlank())
-                    ? Sort.Direction.DESC
-                    : Sort.Direction.valueOf(direction.trim().toUpperCase());
+            sortDirection = Sort.Direction.valueOf(effectiveDirection.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Invalid sort direction: '" + direction + "'. Allowed values are: ASC, DESC");
+            throw new BadRequestException("Invalid sort direction: '" + effectiveDirection + "'. Allowed values are: ASC, DESC");
         }
 
-        // Leaderboard sorts totalPoints DESC by default, breaking ties by immutable student UUID ASC
+        // Leaderboard sorts totalPoints DESC by default, breaking ties by immutable
+        // student UUID ASC
         Sort sort;
-        if ("totalPoints".equals(field)) {
+        if ("totalPoints".equalsIgnoreCase(rawField) || "points".equalsIgnoreCase(rawField) || "total_points".equalsIgnoreCase(rawField) || "grade".equalsIgnoreCase(rawField)) {
             sort = Sort.by(new Sort.Order(sortDirection, "totalPoints"), new Sort.Order(Sort.Direction.ASC, "id"));
-        } else {
+        } else if ("id".equalsIgnoreCase(rawField)) {
             sort = Sort.by(new Sort.Order(sortDirection, "id"));
+        } else if ("displayName".equalsIgnoreCase(rawField) || "name".equalsIgnoreCase(rawField) || "fullName".equalsIgnoreCase(rawField)) {
+            sort = Sort.by(new Sort.Order(sortDirection, "user.fullName"), new Sort.Order(Sort.Direction.ASC, "id"));
+        } else if ("createdAt".equalsIgnoreCase(rawField)) {
+            sort = Sort.by(new Sort.Order(sortDirection, "createdAt"), new Sort.Order(Sort.Direction.ASC, "id"));
+        } else {
+            sort = Sort.by(new Sort.Order(sortDirection, "totalPoints"), new Sort.Order(Sort.Direction.ASC, "id"));
         }
 
         Pageable pageable = PageRequest.of(page, size, sort);
@@ -90,7 +115,8 @@ public class LeaderboardServiceImpl implements LeaderboardService {
     @Transactional(readOnly = true)
     public LeaderboardEntryResponse getMyRank(User currentUser) {
         StudentProfile profile = studentProfileRepository.findByUserId(currentUser.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Student profile not found for user: " + currentUser.getEmail()));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Student profile not found for user: " + currentUser.getEmail()));
 
         long rank = studentProfileRepository.countCompetitionRank(profile.getTotalPoints());
         return studentProfileMapper.toLeaderboardEntry(profile, rank);
@@ -98,7 +124,8 @@ public class LeaderboardServiceImpl implements LeaderboardService {
 
     @Override
     @Transactional(readOnly = true)
-    public com.rankforge.dto.response.PagedResponse<com.rankforge.dto.response.PointTransactionResponse> getRecentActivity(int page, int size) {
+    public com.rankforge.dto.response.PagedResponse<com.rankforge.dto.response.PointTransactionResponse> getRecentActivity(
+            int page, int size) {
         if (page < 0) {
             throw new BadRequestException("Page index cannot be negative");
         }
@@ -110,6 +137,3 @@ public class LeaderboardServiceImpl implements LeaderboardService {
         return com.rankforge.dto.response.PagedResponse.from(txPage.map(pointTransactionMapper::toResponse));
     }
 }
-
-
-

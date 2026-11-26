@@ -18,21 +18,58 @@ import { useRouter } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { useTheme } from "@/context/ThemeContext";
 import { AppText as Text } from "@/components/AppText";
+import { useResponsive } from "@/lib/responsive";
 
-export function Screen({ children, scroll = true, style, onRefresh, refreshing = false }: PropsWithChildren<{ scroll?: boolean; style?: StyleProp<ViewStyle>; onRefresh?: () => void; refreshing?: boolean }>) {
+export function Screen({
+  children,
+  scroll = true,
+  style,
+  onRefresh,
+  refreshing = false,
+}: PropsWithChildren<{
+  scroll?: boolean;
+  style?: StyleProp<ViewStyle>;
+  onRefresh?: () => void;
+  refreshing?: boolean;
+}>) {
   const { colors } = useTheme();
+  const { horizontalPadding, contentMaxWidth } = useResponsive();
+
+  const containerStyle: ViewStyle = {
+    width: "100%",
+    maxWidth: contentMaxWidth,
+    alignSelf: "center",
+    paddingHorizontal: horizontalPadding,
+    paddingTop: 14,
+    paddingBottom: 34,
+    gap: 18,
+  };
+
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.background }]} edges={["top", "left", "right"]}>
       {scroll ? (
         <ScrollView
-          contentContainerStyle={[styles.screen, style]}
+          contentContainerStyle={[styles.scrollContent, { alignItems: "center" }]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
-          refreshControl={onRefresh ? <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} colors={[colors.primary]} /> : undefined}
+          refreshControl={
+            onRefresh ? (
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor={colors.primary}
+                colors={[colors.primary]}
+              />
+            ) : undefined
+          }
         >
-          {children}
+          <View style={[containerStyle, style]}>{children}</View>
         </ScrollView>
-      ) : <View style={[styles.screen, styles.fill, style]}>{children}</View>}
+      ) : (
+        <View style={[styles.fill, { alignItems: "center" }]}>
+          <View style={[styles.fill, containerStyle, style]}>{children}</View>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -177,33 +214,34 @@ export function Divider() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
+  scrollContent: { flexGrow: 1, width: "100%" },
   screen: { paddingHorizontal: 20, paddingTop: 14, paddingBottom: 34, gap: 20 },
-  fill: { flex: 1 },
-  header: { gap: 8 },
+  fill: { flex: 1, width: "100%" },
+  header: { gap: 8, width: "100%" },
   headerTitleRow: { flexDirection: "row", alignItems: "center", gap: 12 },
-  headerText: { flex: 1 },
+  headerText: { flex: 1, minWidth: 0 },
   pageTitle: { fontFamily: "PlusJakartaSans_800ExtraBold", fontSize: 27, fontWeight: "800", letterSpacing: -0.5 },
   subtitle: { fontFamily: "PlusJakartaSans_400Regular", fontSize: 13, marginTop: 4, lineHeight: 19 },
   backButton: { width: 44, height: 44, borderRadius: 14, alignItems: "center", justifyContent: "center" },
-  card: { borderWidth: 1, borderRadius: 21, padding: 17, gap: 12, shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.045, shadowRadius: 14, elevation: 1 },
-  sectionTitle: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  card: { width: "100%", borderWidth: 1, borderRadius: 21, padding: 17, gap: 12, shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.045, shadowRadius: 14, elevation: 1 },
+  sectionTitle: { width: "100%", flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   sectionHeading: { fontFamily: "PlusJakartaSans_700Bold", fontSize: 17, fontWeight: "700" },
   label: { fontFamily: "PlusJakartaSans_600SemiBold", fontSize: 12, fontWeight: "600", marginBottom: 7 },
-  fieldWrap: { gap: 1 },
-  inputShell: { minHeight: 49, borderWidth: 1, borderRadius: 14, flexDirection: "row", alignItems: "center" },
+  fieldWrap: { width: "100%", gap: 1 },
+  inputShell: { width: "100%", minHeight: 49, borderWidth: 1, borderRadius: 14, flexDirection: "row", alignItems: "center" },
   input: { fontFamily: "PlusJakartaSans_400Regular", flex: 1, minHeight: 47, paddingHorizontal: 14, fontSize: 15 },
   button: { minHeight: 48, paddingHorizontal: 17, borderRadius: 14, borderWidth: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 9 },
   buttonText: { fontFamily: "PlusJakartaSans_700Bold", fontSize: 14, fontWeight: "700" },
-  state: { paddingVertical: 24, gap: 12 },
-  skeletonRow: { minHeight: 65, borderWidth: 1, borderRadius: 16, paddingHorizontal: 13, flexDirection: "row", alignItems: "center", gap: 12 },
-  skeletonCircle: { width: 37, height: 37, borderRadius: 19 },
-  skeletonLines: { flex: 1, gap: 8 },
+  state: { width: "100%", paddingVertical: 24, gap: 12 },
+  skeletonRow: { width: "100%", minHeight: 65, borderWidth: 1, borderRadius: 16, paddingHorizontal: 13, flexDirection: "row", alignItems: "center", gap: 12 },
+  skeletonCircle: { width: 37, height: 37, borderRadius: 19, flexShrink: 0 },
+  skeletonLines: { flex: 1, gap: 8, minWidth: 0 },
   skeletonLine: { height: 8, borderRadius: 5 },
-  skeletonValue: { width: 42, height: 11, borderRadius: 5 },
-  stateCard: { alignItems: "center", padding: 25, borderWidth: 1, borderRadius: 19, gap: 10 },
+  skeletonValue: { width: 42, height: 11, borderRadius: 5, flexShrink: 0 },
+  stateCard: { width: "100%", alignItems: "center", padding: 25, borderWidth: 1, borderRadius: 19, gap: 10 },
   stateTitle: { fontSize: 16, fontWeight: "700", textAlign: "center" },
   stateText: { fontSize: 13, textAlign: "center", lineHeight: 20 },
-  pagination: { flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 18, marginVertical: 2 },
+  pagination: { width: "100%", flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 18, marginVertical: 2 },
   pageArrow: { height: 44, width: 44, borderWidth: 1, borderRadius: 14, alignItems: "center", justifyContent: "center" },
   pageLabel: { fontSize: 13 },
 });

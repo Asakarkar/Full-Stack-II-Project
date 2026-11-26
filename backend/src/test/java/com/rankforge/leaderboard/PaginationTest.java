@@ -55,7 +55,8 @@ class PaginationTest {
     @Test
     @DisplayName("Supports server-side pagination returning totalElements, totalPages, page, size, and content")
     void paginationReturnsExpectedStructure() {
-        PagedResponse<LeaderboardEntryResponse> response = leaderboardService.getLeaderboard(0, 10, "DESC", "totalPoints");
+        PagedResponse<LeaderboardEntryResponse> response = leaderboardService.getLeaderboard(0, 10, "DESC",
+                "totalPoints");
 
         assertNotNull(response);
         assertEquals(10, response.content().size());
@@ -71,13 +72,15 @@ class PaginationTest {
     @Test
     @DisplayName("Navigates to second and last pages accurately")
     void paginationNavigatesPages() {
-        PagedResponse<LeaderboardEntryResponse> pageTwo = leaderboardService.getLeaderboard(1, 10, "DESC", "totalPoints");
+        PagedResponse<LeaderboardEntryResponse> pageTwo = leaderboardService.getLeaderboard(1, 10, "DESC",
+                "totalPoints");
         assertEquals(10, pageTwo.content().size());
         assertEquals(1, pageTwo.page());
         assertFalse(pageTwo.first());
         assertFalse(pageTwo.last());
 
-        PagedResponse<LeaderboardEntryResponse> pageThree = leaderboardService.getLeaderboard(2, 10, "DESC", "totalPoints");
+        PagedResponse<LeaderboardEntryResponse> pageThree = leaderboardService.getLeaderboard(2, 10, "DESC",
+                "totalPoints");
         assertEquals(5, pageThree.content().size());
         assertEquals(2, pageThree.page());
         assertFalse(pageThree.first());
@@ -93,16 +96,19 @@ class PaginationTest {
     }
 
     @Test
-    @DisplayName("Enforces sort parameter whitelist (rejects arbitrary unlisted fields)")
+    @DisplayName("Enforces sort parameter whitelist and handles aliases and compound formats")
     void enforcesSortWhitelist() {
-        // Whitelisted sort fields succeed
+        // Whitelisted sort fields and aliases succeed
         assertNotNull(leaderboardService.getLeaderboard(0, 10, "DESC", "totalPoints"));
         assertNotNull(leaderboardService.getLeaderboard(0, 10, "ASC", "id"));
+        assertNotNull(leaderboardService.getLeaderboard(0, 10, "DESC", "points"));
+        assertNotNull(leaderboardService.getLeaderboard(0, 10, null, "points,desc"));
+        assertNotNull(leaderboardService.getLeaderboard(0, 10, null, "totalPoints,asc"));
+        assertNotNull(leaderboardService.getLeaderboard(0, 10, "ASC", "displayName"));
 
         // Unlisted sort fields are rejected with BadRequestException
-        assertThrows(BadRequestException.class, () ->
-                leaderboardService.getLeaderboard(0, 10, "DESC", "unauthorizedColumn; DROP TABLE users;"));
-        assertThrows(BadRequestException.class, () ->
-                leaderboardService.getLeaderboard(0, 10, "DESC", "passwordHash"));
+        assertThrows(BadRequestException.class,
+                () -> leaderboardService.getLeaderboard(0, 10, "DESC", "unauthorizedColumn; DROP TABLE users;"));
+        assertThrows(BadRequestException.class, () -> leaderboardService.getLeaderboard(0, 10, "DESC", "passwordHash"));
     }
 }

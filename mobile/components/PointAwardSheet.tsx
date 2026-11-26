@@ -8,6 +8,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { awardPoints } from "@/store/pointsSlice";
 import { getErrorMessage } from "@/lib/apiConfig";
+import { useResponsive } from "@/lib/responsive";
 import type { LeaderboardEntry } from "@/lib/types";
 import { AppText as Text } from "@/components/AppText";
 
@@ -27,6 +28,7 @@ export function PointAwardSheet({
   onSuccess,
 }: PointAwardSheetProps) {
   const { colors } = useTheme();
+  const { isTabletOrDesktop } = useResponsive();
   const dispatch = useAppDispatch();
   const submitting = useAppSelector((state) => state.points.submitting);
 
@@ -98,8 +100,8 @@ export function PointAwardSheet({
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={styles.backdrop}>
-        <Card style={[styles.sheet, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+      <View style={[styles.backdrop, isTabletOrDesktop && styles.backdropTablet]}>
+        <Card style={[styles.sheet, { backgroundColor: colors.surface, borderColor: colors.border }, isTabletOrDesktop && styles.sheetTablet]}>
           {/* Header */}
           <View style={styles.sheetHeader}>
             <View style={styles.studentInfo}>
@@ -270,6 +272,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#060710B0",
     justifyContent: "flex-end",
   },
+  backdropTablet: {
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
   sheet: {
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
@@ -277,6 +284,13 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 0,
     padding: 22,
     gap: 13,
+    width: "100%",
+  },
+  sheetTablet: {
+    maxWidth: 520,
+    borderRadius: 24,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
   },
   sheetHeader: {
     flexDirection: "row",
@@ -366,6 +380,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 22,
     gap: 14,
+    maxWidth: 480,
+    width: "100%",
+    alignSelf: "center",
   },
   reviewIcon: {
     width: 50,

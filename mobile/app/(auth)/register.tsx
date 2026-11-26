@@ -7,12 +7,14 @@ import { useTheme } from "@/context/ThemeContext";
 import { useAppDispatch } from "@/store";
 import { register } from "@/store/authSlice";
 import { getErrorMessage } from "@/lib/apiConfig";
+import { useResponsive } from "@/lib/responsive";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { AppText as Text } from "@/components/AppText";
 import { getEmailValidationError } from "@/lib/emailValidation";
 
 export default function RegisterScreen() {
   const { colors } = useTheme();
+  const { isTabletOrDesktop } = useResponsive();
   const dispatch = useAppDispatch();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -50,7 +52,7 @@ export default function RegisterScreen() {
 
   return (
     <Screen>
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.container}>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={[styles.container, isTabletOrDesktop && styles.containerTablet]}>
         <Animated.View entering={Platform.OS === "web" ? undefined : FadeInDown.duration(420)} style={{ gap: 8 }}>
           <Text style={[styles.eyebrow, { color: colors.primary }]}>START YOUR JOURNEY</Text>
           <Text style={[styles.title, { color: colors.text }]}>Build your momentum.</Text>
@@ -113,7 +115,8 @@ export default function RegisterScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", gap: 23, paddingVertical: 24 },
+  container: { flex: 1, justifyContent: "center", gap: 23, paddingVertical: 24, width: "100%" },
+  containerTablet: { maxWidth: 460, alignSelf: "center" },
   eyebrow: { fontSize: 11, fontWeight: "900", letterSpacing: 2 },
   title: { fontFamily: "PlusJakartaSans_800ExtraBold", fontSize: 31, fontWeight: "800", letterSpacing: -0.8 },
   copy: { fontFamily: "PlusJakartaSans_400Regular", fontSize: 14, lineHeight: 21 },

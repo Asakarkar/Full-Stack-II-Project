@@ -64,11 +64,11 @@ public class SecurityConfig {
                                 "/api/v1/teacher/**", "/api/teacher/**"
                         ).hasRole("TEACHER")
                         .requestMatchers(
-                                "/api/v1/students/me", "/api/student/dashboard", "/api/student/profile",
-                                "/api/student/points", "/api/student/analytics"
+                                "/api/v1/students/me", "/api/students/me",
+                                "/api/v1/student/**", "/api/student/**"
                         ).hasRole("STUDENT")
                         .requestMatchers(
-                                "/api/v1/students/**"
+                                "/api/v1/students/**", "/api/students/**"
                         ).authenticated()
                         .requestMatchers(
                                 "/api/v1/leaderboard/**", "/api/leaderboard/**",

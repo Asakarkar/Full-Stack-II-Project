@@ -50,9 +50,24 @@ export const rankForgeApi = createApi({
     leaderboard: builder.query<PageResult<LeaderboardEntry>, { page: number; limit: number; sort: "points" | "displayName" | "grade"; order: "asc" | "desc" }>({
       query: ({ page, limit, sort, order }) => ({
         url: "/leaderboard",
-        params: { page: page - 1, size: limit, sort: `${sort},${order}` },
+        params: {
+          page: page - 1,
+          size: limit,
+          sort: sort === "points" ? "totalPoints" : sort,
+          direction: order ? order.toUpperCase() : "DESC",
+        },
       }),
-      transformResponse: (response: PageEnvelope<LeaderboardEntry>) => normalizeSpringPage(response),
+      transformResponse: (response: PageEnvelope<LeaderboardEntry>) => {
+        const normalized = normalizeSpringPage(response);
+        return {
+          ...normalized,
+          items: (normalized.items || []).map((item: any) => ({
+            ...item,
+            displayName: item.displayName || item.fullName || "Student",
+            points: typeof item.points === "number" ? item.points : Number(item.totalPoints || 0),
+          })),
+        };
+      },
       providesTags: ["Leaderboard"],
     }),
     students: builder.query<PageResult<Student>, {

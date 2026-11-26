@@ -10,6 +10,7 @@ import { setStudentFilters, setStudentPage, setStudentSearch, setStudentSort } f
 import { useStudentsQuery } from "@/store/api";
 import { getErrorMessage } from "@/lib/apiConfig";
 import { isTeacherRole } from "@/lib/types";
+import { useResponsive } from "@/lib/responsive";
 import { AppText as Text } from "@/components/AppText";
 
 const sortChoices = [
@@ -22,6 +23,7 @@ const sortChoices = [
 
 export default function StudentsScreen() {
   const { colors } = useTheme();
+  const { isSmallPhone, contentMaxWidth, horizontalPadding } = useResponsive();
   const dispatch = useAppDispatch();
   const role = useAppSelector((state) => state.auth.user?.role);
   const criteria = useAppSelector((state) => state.students);
@@ -80,7 +82,7 @@ export default function StudentsScreen() {
       {filtersOpen && (
         <Card style={styles.filterCard}>
           <Field label="Grade (exact)" placeholder="Any grade" value={grade} onChangeText={setGrade} maxLength={50} />
-          <View style={styles.rangeRow}>
+          <View style={[styles.rangeRow, isSmallPhone && { flexDirection: "column" }]}>
             <Field label="Min points" placeholder="No minimum" value={minimum} onChangeText={(value) => setMinimum(value.replace(/[^\d]/g, ""))} keyboardType="number-pad" />
             <Field label="Max points" placeholder="No maximum" value={maximum} onChangeText={(value) => setMaximum(value.replace(/[^\d]/g, ""))} keyboardType="number-pad" />
           </View>
@@ -124,7 +126,7 @@ export default function StudentsScreen() {
           </Pressable>
         )}
         ListFooterComponent={data?.items.length ? <Pagination page={data.page} totalPages={data.totalPages} onChange={(page) => dispatch(setStudentPage(page))} /> : null}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[styles.listContent, { paddingHorizontal: horizontalPadding, maxWidth: contentMaxWidth, width: "100%", alignSelf: "center" }]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={isFetching} onRefresh={refetch} tintColor={colors.primary} colors={[colors.primary]} />}

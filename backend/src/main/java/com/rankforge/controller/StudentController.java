@@ -2,6 +2,7 @@ package com.rankforge.controller;
 
 import com.rankforge.dto.response.PagedResponse;
 import com.rankforge.dto.response.PointTransactionResponse;
+import com.rankforge.dto.response.StudentDashboardResponse;
 import com.rankforge.dto.response.StudentProfileResponse;
 import com.rankforge.entity.User;
 import com.rankforge.service.StudentService;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.UUID;
 
 @RestController
-@RequestMapping({"/api/v1/students", "/api/students"})
+@RequestMapping({ "/api/v1/students", "/api/students", "/api/v1/student", "/api/student" })
 public class StudentController {
 
     private final StudentService studentService;
@@ -25,15 +26,39 @@ public class StudentController {
         this.studentService = studentService;
     }
 
-    @GetMapping("/me")
+    @GetMapping({ "/me", "/profile" })
     public ResponseEntity<StudentProfileResponse> getMyProfile(@AuthenticationPrincipal User currentUser) {
         StudentProfileResponse response = studentService.getMyProfile(currentUser);
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/dashboard")
+    public ResponseEntity<StudentDashboardResponse> getDashboard(@AuthenticationPrincipal User currentUser) {
+        StudentDashboardResponse response = studentService.getStudentDashboard(currentUser);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/analytics")
+    public ResponseEntity<com.rankforge.dto.response.StudentAnalyticsResponse> getStudentAnalytics(@AuthenticationPrincipal User currentUser) {
+        com.rankforge.dto.response.StudentAnalyticsResponse response = studentService.getStudentAnalytics(currentUser);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/points")
+    public ResponseEntity<PagedResponse<PointTransactionResponse>> getMyPoints(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String sort,
+            @AuthenticationPrincipal User currentUser) {
+        StudentProfileResponse profile = studentService.getMyProfile(currentUser);
+        PagedResponse<PointTransactionResponse> response = studentService.getStudentTransactions(profile.id(), page,
+                size, currentUser);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<StudentProfileResponse> getStudentById(@PathVariable UUID id,
-                                                                 @AuthenticationPrincipal User currentUser) {
+            @AuthenticationPrincipal User currentUser) {
         StudentProfileResponse response = studentService.getStudentById(id, currentUser);
         return ResponseEntity.ok(response);
     }
@@ -44,9 +69,8 @@ public class StudentController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @AuthenticationPrincipal User currentUser) {
-        PagedResponse<PointTransactionResponse> response = studentService.getStudentTransactions(id, page, size, currentUser);
+        PagedResponse<PointTransactionResponse> response = studentService.getStudentTransactions(id, page, size,
+                currentUser);
         return ResponseEntity.ok(response);
     }
 }
-
-

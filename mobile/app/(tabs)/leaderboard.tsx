@@ -18,6 +18,7 @@ import {
 } from "@/store/leaderboardSlice";
 import { calculateMilestone, getRankMedal } from "@/lib/gamification";
 import { isStudentRole, isTeacherRole, LeaderboardEntry, PointTransaction } from "@/lib/types";
+import { useResponsive } from "@/lib/responsive";
 import { AppText as Text } from "@/components/AppText";
 
 const sortChoices = [
@@ -27,6 +28,7 @@ const sortChoices = [
 
 export default function LeaderboardScreen() {
   const { colors } = useTheme();
+  const { isSmallPhone, isTabletOrDesktop } = useResponsive();
   const dispatch = useAppDispatch();
   const leaderboardState = useAppSelector((state) => state.leaderboard);
   const user = useAppSelector((state) => state.auth.user);
@@ -197,8 +199,8 @@ export default function LeaderboardScreen() {
               <View style={styles.podiumStage}>
                 {/* 2nd Place: Silver (Left) */}
                 {silver && (
-                  <Animated.View entering={FadeInUp.duration(400).delay(80)} style={styles.podiumColumn}>
-                    <Avatar name={silver.displayName} size={46} />
+                  <Animated.View entering={FadeInUp.duration(400).delay(80)} style={[styles.podiumColumn, isTabletOrDesktop && styles.podiumColumnTablet]}>
+                    <Avatar name={silver.displayName} size={isSmallPhone ? 38 : 46} />
                     <View style={[styles.medalBadge, { backgroundColor: "#F1F5F9", borderColor: "#64748B" }]}>
                       <Medal size={12} color="#64748B" />
                       <Text style={styles.medalTextSilver}>#2</Text>
@@ -215,11 +217,11 @@ export default function LeaderboardScreen() {
 
                 {/* 1st Place: Gold (Center - Tallest) */}
                 {gold && (
-                  <Animated.View entering={FadeInUp.duration(450)} style={styles.podiumColumn}>
+                  <Animated.View entering={FadeInUp.duration(450)} style={[styles.podiumColumn, isTabletOrDesktop && styles.podiumColumnTablet]}>
                     <View style={styles.crownWrapper}>
-                      <Crown size={20} color="#F59E0B" />
+                      <Crown size={isSmallPhone ? 16 : 20} color="#F59E0B" />
                     </View>
-                    <Avatar name={gold.displayName} size={54} />
+                    <Avatar name={gold.displayName} size={isSmallPhone ? 46 : 54} />
                     <View style={[styles.medalBadge, { backgroundColor: "#FEF3C7", borderColor: "#F59E0B" }]}>
                       <Trophy size={13} color="#D97706" />
                       <Text style={styles.medalTextGold}>#1</Text>
@@ -236,8 +238,8 @@ export default function LeaderboardScreen() {
 
                 {/* 3rd Place: Bronze (Right) */}
                 {bronze && (
-                  <Animated.View entering={FadeInUp.duration(400).delay(160)} style={styles.podiumColumn}>
-                    <Avatar name={bronze.displayName} size={42} />
+                  <Animated.View entering={FadeInUp.duration(400).delay(160)} style={[styles.podiumColumn, isTabletOrDesktop && styles.podiumColumnTablet]}>
+                    <Avatar name={bronze.displayName} size={isSmallPhone ? 36 : 42} />
                     <View style={[styles.medalBadge, { backgroundColor: "#FFEDD5", borderColor: "#B45309" }]}>
                       <Medal size={12} color="#B45309" />
                       <Text style={styles.medalTextBronze}>#3</Text>
@@ -495,9 +497,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    flexWrap: "wrap",
+    gap: 10,
   },
   personalBadgeWrap: {
     gap: 4,
+    flex: 1,
+    minWidth: 160,
   },
   personalRankPill: {
     flexDirection: "row",
@@ -559,6 +565,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     padding: 18,
     gap: 16,
+    width: "100%",
   },
   podiumHeader: {
     flexDirection: "row",
@@ -576,11 +583,16 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     gap: 8,
     paddingTop: 8,
+    width: "100%",
   },
   podiumColumn: {
     flex: 1,
     alignItems: "center",
     gap: 6,
+    minWidth: 0,
+  },
+  podiumColumnTablet: {
+    maxWidth: 160,
   },
   crownWrapper: {
     marginBottom: -4,
@@ -671,6 +683,7 @@ const styles = StyleSheet.create({
   },
   sortRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: 8,
   },
   listHeader: {
@@ -681,16 +694,20 @@ const styles = StyleSheet.create({
   },
   studentCardsList: {
     gap: 10,
+    width: "100%",
   },
   studentCard: {
     padding: 14,
     borderRadius: 16,
     borderWidth: 1,
+    width: "100%",
   },
   cardMain: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
+    minWidth: 0,
+    width: "100%",
   },
   rankIndicator: {
     width: 36,
@@ -699,6 +716,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
+    flexShrink: 0,
   },
   rankIndicatorText: {
     fontFamily: "JetBrainsMono_700Bold",
@@ -707,12 +725,14 @@ const styles = StyleSheet.create({
   },
   studentDetails: {
     flex: 1,
+    minWidth: 0,
     gap: 2,
   },
   nameRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
+    minWidth: 0,
   },
   cardName: {
     fontFamily: "PlusJakartaSans_700Bold",
@@ -723,6 +743,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 6,
+    flexShrink: 0,
   },
   youBadgeText: {
     color: "#FFFFFF",
@@ -734,6 +755,7 @@ const styles = StyleSheet.create({
   },
   cardActions: {
     alignItems: "flex-end",
+    flexShrink: 0,
     gap: 6,
   },
   scoreBox: {

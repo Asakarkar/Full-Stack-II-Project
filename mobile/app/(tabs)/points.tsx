@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
   balanceUnit: { fontSize: 15 },
   balanceCaption: { fontSize: 12 },
   sectionHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  sortRow: { flexDirection: "row", gap: 8 },
+  sortRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   sortChip: { minHeight: 44, borderWidth: 1, borderRadius: 12, paddingVertical: 9, paddingHorizontal: 12, justifyContent: "center" },
   divider: { height: StyleSheet.hairlineWidth },
   entry: { flexDirection: "row", alignItems: "center", gap: 11 },

@@ -25,7 +25,7 @@ public class LeaderboardController {
     public ResponseEntity<PagedResponse<LeaderboardEntryResponse>> getLeaderboard(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "DESC") String direction,
+            @RequestParam(required = false) String direction,
             @RequestParam(defaultValue = "totalPoints") String sort) {
         PagedResponse<LeaderboardEntryResponse> response = leaderboardService.getLeaderboard(page, size, direction, sort);
         return ResponseEntity.ok(response);

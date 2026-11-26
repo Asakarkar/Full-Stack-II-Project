@@ -9,12 +9,14 @@ import { useAppSelector } from "@/store";
 import { useLeaderboardQuery, useStudentDashboardQuery, useStudentPointsQuery, useTeacherDashboardQuery, useTeacherPointsQuery } from "@/store/api";
 import { getErrorMessage, isNotFoundError } from "@/lib/apiConfig";
 import { isTeacherRole } from "@/lib/types";
+import { useResponsive } from "@/lib/responsive";
 import { AppText as Text } from "@/components/AppText";
 
 const EMPTY_PAGE = { page: 1, limit: 5, sort: "createdAt" as const, order: "desc" as const };
 
 export default function DashboardScreen() {
   const { colors } = useTheme();
+  const { isTabletOrDesktop } = useResponsive();
   const user = useAppSelector((state) => state.auth.user);
   const teacher = isTeacherRole(user?.role);
   const studentDashboard = useStudentDashboardQuery(undefined, { skip: teacher });
@@ -59,7 +61,7 @@ export default function DashboardScreen() {
           </Card>
 
           {teacher && classroom ? (
-            <View style={styles.stats}>
+            <View style={[styles.stats, isTabletOrDesktop && styles.statsTablet]}>
               <Metric icon={<Users size={16} color={colors.primary} />} label="Students" value={classroom.studentCount} />
               <Metric icon={<Award size={16} color={colors.accent} />} label="Points awarded today" value={classroom.pointsAwardedToday} />
               <Metric icon={<ChartNoAxesCombined size={16} color={colors.primary} />} label="Transactions today" value={classroom.transactionsToday} />
@@ -73,7 +75,7 @@ export default function DashboardScreen() {
                 <Text style={[styles.pointsValue, { color: colors.text }]}>{student.profile.pointsBalance.toLocaleString()} <Text style={[styles.pointsUnit, { color: colors.primary }]}>pts</Text></Text>
                 <Text style={[styles.pointsSupporting, { color: colors.muted }]}>{student.totalPointsEarned.toLocaleString()} earned · {student.transactionsCount.toLocaleString()} learning transactions</Text>
               </Card>
-              <View style={styles.stats}>
+              <View style={[styles.stats, isTabletOrDesktop && styles.statsTablet]}>
                 <Metric icon={<Medal size={16} color={colors.primary} />} label="Class rank" value={`#${student.rank}`} />
                 <Metric icon={<Users size={16} color={colors.accent} />} label="Learners" value={student.studentCount} />
                 <Metric icon={<ChartNoAxesCombined size={16} color={colors.primary} />} label="Percentile" value={`${student.percentile.toLocaleString(undefined, { maximumFractionDigits: 1 })}%`} />
@@ -115,12 +117,19 @@ export default function DashboardScreen() {
 
 function Metric({ icon, label, value, available = true }: { icon: React.ReactNode; label: string; value: string | number; available?: boolean }) {
   const { colors } = useTheme();
-  return <Card style={styles.metric}>
-    <View style={[styles.metricIcon, { backgroundColor: colors.primarySoft }]}>{icon}</View>
-    <Text style={[styles.metricValue, { color: colors.text }]}>{value}</Text>
-    <Text style={[styles.metricLabel, { color: colors.muted }]}>{label}</Text>
-    {!available && <Text style={[styles.unavailable, { color: colors.muted }]}>Not available</Text>}
-  </Card>;
+  const { isTabletOrDesktop, isSmallPhone } = useResponsive();
+  return (
+    <Card style={[
+      styles.metric,
+      isSmallPhone && styles.metricSmallPhone,
+      isTabletOrDesktop && styles.metricTablet,
+    ]}>
+      <View style={[styles.metricIcon, { backgroundColor: colors.primarySoft }]}>{icon}</View>
+      <Text style={[styles.metricValue, { color: colors.text }]}>{value}</Text>
+      <Text style={[styles.metricLabel, { color: colors.muted }]}>{label}</Text>
+      {!available && <Text style={[styles.unavailable, { color: colors.muted }]}>Not available</Text>}
+    </Card>
+  );
 }
 
 function formatMovement(value: number) {
@@ -151,8 +160,11 @@ const styles = StyleSheet.create({
   pointsValue: { fontSize: 36, fontWeight: "900", letterSpacing: -1 },
   pointsUnit: { fontSize: 15 },
   pointsSupporting: { fontSize: 11 },
-  stats: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-  metric: { width: "48%", flexGrow: 1, padding: 13, gap: 6 },
+  stats: { flexDirection: "row", flexWrap: "wrap", gap: 10, width: "100%" },
+  statsTablet: { gap: 12 },
+  metric: { width: "48%", flexGrow: 1, minWidth: 140, padding: 13, gap: 6 },
+  metricSmallPhone: { width: "100%", minWidth: "100%" },
+  metricTablet: { minWidth: 160, maxWidth: "23.5%" },
   metricIcon: { width: 31, height: 31, borderRadius: 11, alignItems: "center", justifyContent: "center" },
   metricValue: { fontFamily: "JetBrainsMono_700Bold", fontSize: 18, fontWeight: "800" },
   metricLabel: { fontSize: 10, lineHeight: 15 },

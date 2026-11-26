@@ -15,10 +15,10 @@ import java.util.UUID;
 @Repository
 public interface PointTransactionRepository extends JpaRepository<PointTransaction, UUID> {
 
-    @EntityGraph(attributePaths = {"student.user", "teacher"})
+    @EntityGraph(attributePaths = { "student.user", "teacher" })
     Page<PointTransaction> findByStudentId(UUID studentId, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"student.user", "teacher"})
+    @EntityGraph(attributePaths = { "student.user", "teacher" })
     Page<PointTransaction> findAll(Pageable pageable);
 
     @Query("SELECT COUNT(pt) FROM PointTransaction pt WHERE pt.createdAt >= :since")
@@ -35,6 +35,10 @@ public interface PointTransactionRepository extends JpaRepository<PointTransacti
 
     @Query("SELECT COUNT(pt) FROM PointTransaction pt WHERE pt.student.id = :studentId")
     long countByStudentId(@Param("studentId") UUID studentId);
+
+    @Query("SELECT COALESCE(SUM(pt.deltaPoints), 0) FROM PointTransaction pt WHERE pt.student.id = :studentId AND pt.deltaPoints > 0")
+    long sumAwardedByStudentId(@Param("studentId") UUID studentId);
+
+    @Query("SELECT COALESCE(SUM(ABS(pt.deltaPoints)), 0) FROM PointTransaction pt WHERE pt.student.id = :studentId AND pt.deltaPoints < 0")
+    long sumDeductedByStudentId(@Param("studentId") UUID studentId);
 }
-
-

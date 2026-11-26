@@ -24,16 +24,23 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.UUID;
 
 @RestController
-@RequestMapping({"/api/v1/teacher", "/api/teacher"})
+@RequestMapping({ "/api/v1/teacher", "/api/teacher" })
 @PreAuthorize("hasRole('TEACHER')")
 public class TeacherController {
 
     private final TeacherService teacherService;
     private final PointService pointService;
+    private final com.rankforge.service.LeaderboardService leaderboardService;
+    private final com.rankforge.service.StudentService studentService;
 
-    public TeacherController(TeacherService teacherService, PointService pointService) {
+    public TeacherController(TeacherService teacherService,
+                             PointService pointService,
+                             com.rankforge.service.LeaderboardService leaderboardService,
+                             com.rankforge.service.StudentService studentService) {
         this.teacherService = teacherService;
         this.pointService = pointService;
+        this.leaderboardService = leaderboardService;
+        this.studentService = studentService;
     }
 
     @GetMapping("/dashboard")
@@ -49,6 +56,25 @@ public class TeacherController {
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String sort) {
         PagedResponse<StudentProfileResponse> response = teacherService.searchStudents(search, page, size, sort);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/points")
+    public ResponseEntity<PagedResponse<PointTransactionResponse>> getRecentPoints(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String sort) {
+        PagedResponse<PointTransactionResponse> response = leaderboardService.getRecentActivity(page, size);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/students/{id}/points")
+    public ResponseEntity<PagedResponse<PointTransactionResponse>> getStudentPoints(
+            @PathVariable UUID id,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @AuthenticationPrincipal User teacher) {
+        PagedResponse<PointTransactionResponse> response = studentService.getStudentTransactions(id, page, size, teacher);
         return ResponseEntity.ok(response);
     }
 
@@ -83,5 +109,3 @@ public class TeacherController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }
-
-

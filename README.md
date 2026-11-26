@@ -1,6 +1,6 @@
 # RankForge — Student Performance, Leaderboard & Academic Evaluation Platform
 
-RankForge is an enterprise-grade academic reward and gamified evaluation platform consisting of a **Spring Boot 3 (Java 17/21+) REST API**, **PostgreSQL 16** persistence layer with Flyway migrations, and an **Expo React Native (TypeScript)** mobile client with Redux Toolkit and SecureStore.
+RankForge is an enterprise-grade academic reward and gamified evaluation platform consisting of a **Spring Boot 3 (Java 25 LTS) REST API**, **PostgreSQL 16** persistence layer with Flyway migrations, and an **Expo React Native (TypeScript)** mobile client with Redux Toolkit and SecureStore.
 
 ---
 
