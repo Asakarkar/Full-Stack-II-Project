@@ -3,12 +3,18 @@ package com.rankforge.dto.request;
 import com.rankforge.entity.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record RegisterRequest(
         @NotBlank(message = "Full name is required")
         @Size(min = 2, max = 100, message = "Full name must be between 2 and 100 characters")
         String fullName,
+
+        @NotBlank(message = "Username is required")
+        @Size(min = 3, max = 30, message = "Username must be between 3 and 30 characters")
+        @Pattern(regexp = "^[a-zA-Z0-9][a-zA-Z0-9_.-]*$", message = "Username must start with a letter or number and contain only letters, numbers, dots, underscores, or hyphens")
+        String username,
 
         @NotBlank(message = "Email is required")
         @Email(message = "Email must be a valid email address")

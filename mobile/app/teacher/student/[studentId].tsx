@@ -23,9 +23,10 @@ export default function TeacherStudentScreen() {
   const { colors } = useTheme();
   const dispatch = useAppDispatch();
   const role = useAppSelector((state) => state.auth.user?.role);
-  const params = useLocalSearchParams<{ studentId?: string; name?: string; grade?: string }>();
+  const params = useLocalSearchParams<{ studentId?: string; name?: string; username?: string; grade?: string }>();
   const studentId = typeof params.studentId === "string" ? params.studentId : "";
   const name = typeof params.name === "string" ? params.name : "Student";
+  const username = typeof params.username === "string" ? params.username : "";
   const grade = typeof params.grade === "string" ? params.grade : "";
   const pageState = useAppSelector((state) => state.points);
 
@@ -76,7 +77,7 @@ export default function TeacherStudentScreen() {
 
   return (
     <Screen onRefresh={historyQuery.refetch} refreshing={historyQuery.isFetching}>
-      <PageHeader title={name} subtitle={grade ? `Student · ${grade}` : "Student point history"} back />
+      <PageHeader title={name} subtitle={[username && `@${username}`, grade && `Student · ${grade}`].filter(Boolean).join(" · ") || "Student point history"} back />
 
       <Card>
         <SectionTitle title="Recognize progress" />

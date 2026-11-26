@@ -32,6 +32,7 @@ public interface StudentProfileRepository extends JpaRepository<StudentProfile, 
                 SELECT sp FROM StudentProfile sp
                 WHERE (:search IS NULL OR
                        LOWER(sp.user.fullName) LIKE LOWER(CONCAT('%', :search, '%')) OR
+                       LOWER(sp.user.accountUsername) LIKE LOWER(CONCAT('%', :search, '%')) OR
                        LOWER(sp.user.email) LIKE LOWER(CONCAT('%', :search, '%')))
             """)
     Page<StudentProfile> searchStudents(@Param("search") String search, Pageable pageable);

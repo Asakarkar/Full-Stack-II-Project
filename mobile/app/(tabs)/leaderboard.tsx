@@ -78,8 +78,9 @@ export default function LeaderboardScreen() {
     return students.filter((entry) => {
       if (!query) return true;
       const name = entry.displayName.toLowerCase();
+      const username = entry.username.toLowerCase();
       const email = (entry.email ?? "").toLowerCase();
-      return name.includes(query) || email.includes(query);
+      return name.includes(query) || username.includes(query) || email.includes(query);
     });
   }, [students, search]);
 
@@ -150,6 +151,7 @@ export default function LeaderboardScreen() {
                 </Text>
               </View>
               <Text style={[styles.personalTitle, { color: colors.text }]}>{user?.fullName || "Your Profile"}</Text>
+              {!!user?.username && <Text style={[styles.personalSub, { color: colors.primary }]}>@{user.username}</Text>}
               <Text style={[styles.personalSub, { color: colors.muted }]}>{personalMilestone.currentTier}</Text>
             </View>
             <View style={styles.personalPointsBox}>
@@ -202,6 +204,7 @@ export default function LeaderboardScreen() {
                     <Text numberOfLines={1} style={[styles.podiumName, { color: colors.text }]}>
                       {silver.displayName}
                     </Text>
+                    <Text numberOfLines={1} style={[styles.podiumPoints, { color: colors.muted }]}>@{silver.username}</Text>
                     <Text style={[styles.podiumPoints, { color: colors.primary }]}>{silver.points} pts</Text>
                     <View style={[styles.pedestal, styles.pedestalSilver, { backgroundColor: colors.raised }]}>
                       <Text style={[styles.pedestalRank, { color: "#64748B" }]}>2</Text>
@@ -222,6 +225,7 @@ export default function LeaderboardScreen() {
                     <Text numberOfLines={1} style={[styles.podiumName, styles.goldName, { color: colors.text }]}>
                       {gold.displayName}
                     </Text>
+                    <Text numberOfLines={1} style={[styles.podiumPoints, { color: colors.muted }]}>@{gold.username}</Text>
                     <Text style={[styles.podiumPoints, styles.goldPoints]}>{gold.points} pts</Text>
                     <View style={[styles.pedestal, styles.pedestalGold, { backgroundColor: `${colors.primarySoft}` }]}>
                       <Text style={[styles.pedestalRank, { color: "#D97706" }]}>1</Text>
@@ -239,6 +243,7 @@ export default function LeaderboardScreen() {
                     <Text numberOfLines={1} style={[styles.podiumName, { color: colors.text }]}>
                       {bronze.displayName}
                     </Text>
+                    <Text numberOfLines={1} style={[styles.podiumPoints, { color: colors.muted }]}>@{bronze.username}</Text>
                     <Text style={[styles.podiumPoints, { color: colors.primary }]}>{bronze.points} pts</Text>
                     <View style={[styles.pedestal, styles.pedestalBronze, { backgroundColor: colors.raised }]}>
                       <Text style={[styles.pedestalRank, { color: "#B45309" }]}>3</Text>
@@ -254,7 +259,7 @@ export default function LeaderboardScreen() {
             <TextInput
               value={search}
               onChangeText={setSearch}
-              placeholder="Search students by name..."
+              placeholder="Search students by name or username..."
               placeholderTextColor={colors.muted}
               style={[styles.searchInput, { color: colors.text }]}
             />
@@ -334,7 +339,7 @@ export default function LeaderboardScreen() {
                                 )}
                               </View>
                               <Text style={[styles.cardSub, { color: colors.muted }]}>
-                                Tier: {calculateMilestone(entry.points).currentTier}
+                                @{entry.username} · Tier: {calculateMilestone(entry.points).currentTier}
                               </Text>
                             </View>
 

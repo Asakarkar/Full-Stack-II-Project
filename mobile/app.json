@@ -14,7 +14,9 @@
         {
           "configureAndroidBackup": true
         }
-      ]
+      ],
+      "expo-font",
+      "expo-status-bar"
     ],
     "experiments": {
       "typedRoutes": true

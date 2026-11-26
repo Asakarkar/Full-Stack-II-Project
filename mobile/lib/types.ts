@@ -10,6 +10,7 @@ export function isStudentRole(role?: UserRole | null | string): boolean {
 
 export interface User {
   id: string;
+  username: string;
   email: string;
   fullName: string;
   displayName: string;
@@ -30,6 +31,7 @@ export type AuthenticationStatus = "IDLE" | "LOADING" | "AUTHENTICATED" | "UNAUT
 export interface Student {
   id: string;
   userId: string;
+  username: string;
   displayName: string;
   fullName?: string;
   email: string;
@@ -41,6 +43,7 @@ export interface LeaderboardEntry {
   rank: number;
   studentId: string;
   userId?: string;
+  username: string;
   displayName: string;
   fullName?: string;
   email?: string;
@@ -123,6 +126,7 @@ export interface StudentDashboard {
   profile: {
     id: string;
     userId: string;
+    username: string;
     email: string;
     displayName: string;
     grade: string | null;

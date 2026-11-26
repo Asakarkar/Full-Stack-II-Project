@@ -29,11 +29,12 @@ com.rankforge
 
 ## Database Entities & Schema
 
-Flyway manages schema versioning via `src/main/resources/db/migration/V1__init_schema.sql`.
+Flyway manages schema versioning via `src/main/resources/db/migration/`.
 
 ### 1. `users`
 - `id` (VARCHAR(36) UUID, Primary Key)
 - `full_name` (VARCHAR(100), NOT NULL)
+- `username` (VARCHAR(50), UNIQUE, NOT NULL; public profile handle)
 - `email` (VARCHAR(255), UNIQUE, NOT NULL)
 - `password_hash` (VARCHAR(255), NOT NULL, BCrypt)
 - `role` (`STUDENT` or `TEACHER`, CHECK constraint)
@@ -59,6 +60,7 @@ Flyway manages schema versioning via `src/main/resources/db/migration/V1__init_s
 ## Security Model & Teacher Provisioning
 
 - **Stateless Authentication**: Uses Bearer JWT tokens signed with HMAC-SHA256.
+- **Account Names**: Every account has a unique username for display; users continue to sign in with their email address.
 - **Role-Based Guards**: Method-level security with `@PreAuthorize("hasRole('TEACHER')")` protects teacher endpoints.
 - **Teacher Registration Protection**: Public signups create `STUDENT` profiles. Registering with `role: TEACHER` requires an administrative `invitationCode` matching the server secret `TEACHER_INVITATION_CODE`. Unauthorized attempts fail with `403 FORBIDDEN`.
 

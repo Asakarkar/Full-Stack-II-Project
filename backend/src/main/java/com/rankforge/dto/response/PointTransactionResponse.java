@@ -13,23 +13,23 @@ public record PointTransactionResponse(
                 Integer deltaPoints,
                 String reason,
                 Instant createdAt) {
-    @JsonProperty("actorId")
-    public UUID actorId() {
-        return teacherId;
-    }
+        @JsonProperty("actorId")
+        public UUID actorId() {
+                return teacherId;
+        }
 
-    @JsonProperty("actorName")
-    public String actorName() {
-        return teacherName;
-    }
+        @JsonProperty("actorName")
+        public String actorName() {
+                return teacherName;
+        }
 
-    @JsonProperty("amount")
-    public Integer amount() {
-        return deltaPoints != null ? Math.abs(deltaPoints) : 0;
-    }
+        @JsonProperty("amount")
+        public Integer amount() {
+                return deltaPoints != null ? Math.abs(deltaPoints) : 0;
+        }
 
-    @JsonProperty("type")
-    public String type() {
-        return (deltaPoints != null && deltaPoints >= 0) ? "AWARD" : "DEDUCTION";
-    }
+        @JsonProperty("type")
+        public String type() {
+                return (deltaPoints != null && deltaPoints >= 0) ? "AWARD" : "DEDUCTION";
+        }
 }

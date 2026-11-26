@@ -7,6 +7,7 @@ import java.util.UUID;
 public record StudentProfileResponse(
                 UUID id,
                 UUID userId,
+                String username,
                 String fullName,
                 String email,
                 Long totalPoints,

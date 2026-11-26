@@ -63,6 +63,7 @@ interface FetchLeaderboardParams {
 function normalizeLeaderboardEntry(raw: Record<string, unknown>, index: number, page: number, size: number): LeaderboardEntry {
   const studentId = String(raw.studentId || raw.id || "");
   const userId = raw.userId ? String(raw.userId) : undefined;
+  const username = String(raw.username || "");
   const fullName = String(raw.fullName || raw.displayName || "");
   const displayName = fullName || "Student";
   const email = raw.email ? String(raw.email) : undefined;
@@ -76,6 +77,7 @@ function normalizeLeaderboardEntry(raw: Record<string, unknown>, index: number, 
     rank,
     studentId,
     userId,
+    username,
     fullName,
     displayName,
     email,
@@ -107,6 +109,7 @@ export const fetchMyRank = createAsyncThunk<
         rank,
         studentId: String(profile.id || ""),
         userId: String(profile.userId || ""),
+        username: String(profile.username || ""),
         fullName: String(profile.fullName || ""),
         displayName: String(profile.fullName || "You"),
         email: String(profile.email || ""),

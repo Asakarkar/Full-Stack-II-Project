@@ -10,6 +10,46 @@ export function getApiBaseUrlOverride(): string | null {
   return apiBaseUrlOverride;
 }
 
+function getExpoDevelopmentHost(): string | null {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const Constants = require("expo-constants")?.default || require("expo-constants");
+    if (Platform.OS === "android" && Constants?.isDevice === false) {
+      return "10.0.2.2";
+    }
+
+    const hostUri = Constants?.expoConfig?.hostUri || Constants?.manifest2?.extra?.expoGo?.debuggerHost;
+    if (typeof hostUri === "string") {
+      const host = hostUri.split(":")[0];
+      if (host && host !== "localhost" && host !== "127.0.0.1") {
+        return host;
+      }
+    }
+  } catch {
+    // Expo Constants is unavailable in non-Expo environments such as tests.
+  }
+
+  return Platform.OS === "android" ? "10.0.2.2" : null;
+}
+
+function resolveConfiguredUrl(url: string): string {
+  const normalizedUrl = url.trim().replace(/\/+$/, "");
+  const loopbackUrl = normalizedUrl.match(/^(https?:\/\/)(localhost|127\.0\.0\.1)(:\d+)?(?=\/|$)/i);
+  if (!loopbackUrl) {
+    return normalizedUrl;
+  }
+
+  const host =
+    Platform.OS === "web"
+      ? typeof window !== "undefined" && window.location?.hostname
+      : getExpoDevelopmentHost();
+  if (!host) {
+    return normalizedUrl;
+  }
+
+  return normalizedUrl.replace(loopbackUrl[0], `${loopbackUrl[1]}${host}${loopbackUrl[3] || ""}`);
+}
+
 /**
  * Dynamically resolves the API base URL suitable for:
  * 1. Explicit runtime override (useful for testing and network switcher).
@@ -21,35 +61,32 @@ export function getApiBaseUrlOverride(): string | null {
  */
 export function resolveApiBaseUrl(): string {
   if (apiBaseUrlOverride) {
-    return apiBaseUrlOverride;
+    return resolveConfiguredUrl(apiBaseUrlOverride);
   }
 
   const configuredUrl = process.env.EXPO_PUBLIC_API_URL?.trim();
   if (configuredUrl) {
-    return configuredUrl.replace(/\/+$/, "");
+    return resolveConfiguredUrl(configuredUrl);
   }
 
-  // Attempt to resolve development machine LAN IP when running in Expo
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const Constants = require("expo-constants")?.default || require("expo-constants");
-    const hostUri = Constants?.expoConfig?.hostUri || Constants?.manifest2?.extra?.expoGo?.debuggerHost;
-    if (hostUri && typeof hostUri === "string") {
-      const hostIp = hostUri.split(":")[0];
-      if (hostIp && hostIp !== "localhost" && hostIp !== "127.0.0.1") {
-        return `http://${hostIp}:8080/api/v1`;
-      }
+  // Web browser environment: always connect to the host serving the web page or localhost
+  if (Platform.OS === "web") {
+    if (typeof window !== "undefined" && window.location?.hostname) {
+      return `http://${window.location.hostname}:8080/api/v1`;
     }
-  } catch {
-    // Ignore error in environments where Constants is unavailable (e.g. Node tests)
+    return "http://localhost:8080/api/v1";
   }
 
-  // Android emulator loopback alias to host machine
+  // Android: distinguish emulator (10.0.2.2) vs physical device (host LAN IP)
   if (Platform.OS === "android") {
-    return "http://10.0.2.2:8080/api/v1";
+    const host = getExpoDevelopmentHost() || "10.0.2.2";
+    return `http://${host}:8080/api/v1`;
   }
 
-  // Web or default fallback
+  // iOS or fallback
+  const host = getExpoDevelopmentHost();
+  if (host) return `http://${host}:8080/api/v1`;
+
   return "http://localhost:8080/api/v1";
 }
 

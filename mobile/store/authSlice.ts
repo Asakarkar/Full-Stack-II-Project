@@ -24,18 +24,20 @@ const initialState: AuthState = {
 
 function normalizeUser(raw: Record<string, unknown>): User {
   const id = String(raw.id || "");
+  const username = String(raw.username || "");
   const email = String(raw.email || "");
   const fullName = String(raw.fullName || raw.displayName || "");
   const displayName = fullName || email;
   const role = (String(raw.role || "STUDENT").toUpperCase() === "TEACHER" ? "TEACHER" : "STUDENT") as User["role"];
   const createdAt = String(raw.createdAt || new Date().toISOString());
   const updatedAt = raw.updatedAt ? String(raw.updatedAt) : undefined;
-  return { id, email, fullName, displayName, role, createdAt, updatedAt };
+  return { id, username, email, fullName, displayName, role, createdAt, updatedAt };
 }
 
 export interface RegisterPayload {
   fullName?: string;
   displayName?: string;
+  username: string;
   email: string;
   password: string;
   role?: "STUDENT" | "TEACHER";
@@ -60,6 +62,7 @@ export const register = createAsyncThunk<
     const fullName = payload.fullName || payload.displayName || "";
     const body = {
       fullName,
+      username: payload.username.trim(),
       email: payload.email.trim(),
       password: payload.password,
       role: payload.role || "STUDENT",

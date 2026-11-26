@@ -1,6 +1,6 @@
 # RankForge — Student Performance, Leaderboard & Academic Evaluation Platform
 
-RankForge is an academic reward, gamified evaluation, and classroom management platform. It features a high-performance **Spring Boot 3 (Java 25 LTS) REST API**, a relational persistence layer managed via **Flyway migrations** (configured for **MySQL 8** with native support for **PostgreSQL**), and a responsive **React Native / Expo SDK 54** client built with **TypeScript**, **Redux Toolkit**, and **React Native Web**.
+RankForge is an academic reward, gamified evaluation, and classroom management platform. It features a high-performance **Spring Boot 3 (Java 25 LTS) REST API**, a relational persistence layer managed via **Flyway migrations** (configured for **MySQL 8** with native support for **PostgreSQL**), and a responsive **React Native / Expo SDK 58** client built with **TypeScript**, **Redux Toolkit**, and **React Native Web**.
 
 ---
 
@@ -12,7 +12,7 @@ RankForge is an academic reward, gamified evaluation, and classroom management p
 │   ├── src/main/resources/   # Application configuration & Flyway database migrations
 │   └── pom.xml               # Maven configuration (Java 25 LTS, Spring Boot 3)
 │
-├── mobile/                   # Cross-Platform React Native Client (Expo SDK 54)
+├── mobile/                   # Cross-Platform React Native Client (Expo SDK 58)
 │   ├── app/                  # Expo Router tab and auth navigation routes
 │   ├── components/           # Reusable responsive UI cards, charts, sheets, and inputs
 │   ├── hooks/                # Custom responsive and viewport hooks
@@ -21,7 +21,7 @@ RankForge is an academic reward, gamified evaluation, and classroom management p
 ```
 
 ### Technology Stack
-- **Frontend**: React Native, Expo SDK 54, Expo Router, TypeScript, Redux Toolkit, React Native Web, Lucide Icons, Reanimated.
+- **Frontend**: React Native, Expo SDK 58, Expo Router, TypeScript, Redux Toolkit, React Native Web, Lucide Icons, Reanimated.
 - **Backend**: Java 25 LTS, Spring Boot 3.x, Spring Security 6, Spring Data JPA, Hibernate, Flyway.
 - **Database**: MySQL 8.0 (default local configuration) / PostgreSQL compatible, with automated Flyway schema versioning.
 - **Design & Layout**: Responsive adaptive design adjusting automatically across mobile phones, tablets, and desktop browsers.

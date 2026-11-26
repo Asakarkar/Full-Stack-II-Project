@@ -36,11 +36,11 @@ public class AuthServiceImpl implements AuthService {
     private final AppProperties appProperties;
 
     public AuthServiceImpl(UserRepository userRepository,
-                           StudentProfileRepository studentProfileRepository,
-                           PasswordEncoder passwordEncoder,
-                           JwtService jwtService,
-                           UserMapper userMapper,
-                           AppProperties appProperties) {
+            StudentProfileRepository studentProfileRepository,
+            PasswordEncoder passwordEncoder,
+            JwtService jwtService,
+            UserMapper userMapper,
+            AppProperties appProperties) {
         this.userRepository = userRepository;
         this.studentProfileRepository = studentProfileRepository;
         this.passwordEncoder = passwordEncoder;
@@ -59,21 +59,29 @@ public class AuthServiceImpl implements AuthService {
             throw new ConflictException("An account with email " + request.email() + " already exists");
         }
 
+        String normalizedUsername = request.username().trim().toLowerCase(Locale.ROOT);
+        if (userRepository.existsByAccountUsername(normalizedUsername)) {
+            throw new ConflictException("The username " + normalizedUsername + " is already taken");
+        }
+
         Role assignedRole = request.role() != null ? request.role() : Role.STUDENT;
 
         // Security control: Public registration defaults to STUDENT accounts.
         // Unrestricted TEACHER registration creates severe privilege escalation risks,
-        // allowing unauthorized users to award arbitrary points, manipulate ranks, and view
-        // private records. Therefore, a valid administrative invitation code is strictly required.
+        // allowing unauthorized users to award arbitrary points, manipulate ranks, and
+        // view
+        // private records. Therefore, a valid administrative invitation code is
+        // strictly required.
         if (assignedRole == Role.TEACHER) {
             String requiredCode = appProperties.getTeacher().getInvitationCode();
             if (request.invitationCode() == null || !request.invitationCode().equals(requiredCode)) {
-                throw new ForbiddenException("Invalid or missing teacher invitation code. Teacher accounts cannot be self-registered without administrative authorization.");
+                throw new ForbiddenException(
+                        "Invalid or missing teacher invitation code. Teacher accounts cannot be self-registered without administrative authorization.");
             }
         }
 
         String passwordHash = passwordEncoder.encode(request.password());
-        User user = new User(request.fullName(), normalizedEmail, passwordHash, assignedRole);
+        User user = new User(normalizedUsername, request.fullName(), normalizedEmail, passwordHash, assignedRole);
         User savedUser = userRepository.save(user);
 
         if (assignedRole == Role.STUDENT) {

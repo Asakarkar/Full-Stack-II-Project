@@ -44,6 +44,7 @@ export default function ProfileScreen() {
         <Avatar name={student.data?.displayName ?? user?.displayName ?? "RankForge user"} size={64} />
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text numberOfLines={1} style={[styles.name, { color: colors.text }]}>{student.data?.displayName ?? user?.displayName}</Text>
+          {!!(student.data?.username ?? user?.username) && <Text numberOfLines={1} style={[styles.email, { color: colors.primary }]}>@{student.data?.username ?? user?.username}</Text>}
           <Text numberOfLines={1} style={[styles.email, { color: colors.muted }]}>{student.data?.email ?? user?.email}</Text>
           <Text style={[styles.role, { color: colors.primary }]}>{user?.role}</Text>
         </View>

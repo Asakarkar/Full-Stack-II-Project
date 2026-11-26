@@ -52,6 +52,7 @@ public class DemoDataSeeder implements CommandLineRunner {
 
                 // 1. Provision Teacher Account
                 User teacher = new User(
+                                "eleanor.davis",
                                 "Professor Eleanor Davis",
                                 "teacher@rankforge.edu",
                                 passwordEncoder.encode("Teacher123!"),
@@ -59,23 +60,23 @@ public class DemoDataSeeder implements CommandLineRunner {
                 userRepository.save(teacher);
 
                 // 2. Provision 5 Seeded Students
-                seedStudent("Alice Vance", "alice@rankforge.edu", "Student123!", 120L, teacher,
+                seedStudent("Alice Vance", "alice", "alice@rankforge.edu", "Student123!", 120L, teacher,
                                 "High performance in Software Architecture project");
-                seedStudent("Bob Martinez", "bob@rankforge.edu", "Student123!", 120L, teacher,
+                seedStudent("Bob Martinez", "bob", "bob@rankforge.edu", "Student123!", 120L, teacher,
                                 "Exceptional academic leadership & peer mentoring (Tie with Alice)");
-                seedStudent("Charlie Chen", "charlie@rankforge.edu", "Student123!", 95L, teacher,
+                seedStudent("Charlie Chen", "charlie", "charlie@rankforge.edu", "Student123!", 95L, teacher,
                                 "Consistent homework excellence and lab results");
-                seedStudent("Diana Prince", "diana@rankforge.edu", "Student123!", 50L, teacher,
+                seedStudent("Diana Prince", "diana", "diana@rankforge.edu", "Student123!", 50L, teacher,
                                 "Active participation in academic hackathon");
-                seedStudent("Ethan Hunt", "ethan@rankforge.edu", "Student123!", 15L, teacher,
+                seedStudent("Ethan Hunt", "ethan", "ethan@rankforge.edu", "Student123!", 15L, teacher,
                                 "First lab submission and quiz completion");
 
                 log.info("Successfully seeded demo teacher (teacher@rankforge.edu) and 5 student accounts.");
         }
 
-        private void seedStudent(String name, String email, String rawPassword, Long points, User teacher,
+        private void seedStudent(String name, String username, String email, String rawPassword, Long points, User teacher,
                         String reason) {
-                User user = new User(name, email, passwordEncoder.encode(rawPassword), Role.STUDENT);
+                User user = new User(username, name, email, passwordEncoder.encode(rawPassword), Role.STUDENT);
                 userRepository.save(user);
 
                 StudentProfile profile = new StudentProfile(user);

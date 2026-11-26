@@ -17,6 +17,8 @@ export default function RegisterScreen() {
   const { isTabletOrDesktop } = useResponsive();
   const dispatch = useAppDispatch();
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
+  const [usernameError, setUsernameError] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -26,6 +28,12 @@ export default function RegisterScreen() {
 
   const submit = async () => {
     setError("");
+    const normalizedUsername = username.trim();
+    if (!/^[a-zA-Z0-9][a-zA-Z0-9_.-]{2,29}$/.test(normalizedUsername)) {
+      setUsernameError("Use 3–30 letters, numbers, dots, underscores, or hyphens; start with a letter or number.");
+      return;
+    }
+    setUsernameError("");
     const validationError = getEmailValidationError(email);
     if (validationError) {
       setEmailError(validationError);
@@ -37,6 +45,7 @@ export default function RegisterScreen() {
       await dispatch(
         register({
           fullName: name.trim(),
+          username: normalizedUsername,
           email: email.trim(),
           password,
           role: "STUDENT",
@@ -60,6 +69,19 @@ export default function RegisterScreen() {
         </Animated.View>
         <Animated.View entering={Platform.OS === "web" ? undefined : FadeInDown.duration(420).delay(100)} style={styles.form}>
           <Field label="Full name" placeholder="Your name" value={name} onChangeText={setName} autoCapitalize="words" maxLength={100} />
+          <Field
+            label="Username"
+            placeholder="Choose a username"
+            value={username}
+            onChangeText={(value) => {
+              setUsername(value);
+              setUsernameError("");
+            }}
+            autoCapitalize="none"
+            maxLength={30}
+            accessibilityHint={usernameError || undefined}
+          />
+          {!!usernameError && <Text accessibilityRole="alert" style={{ color: colors.danger, fontSize: 13 }}>{usernameError}</Text>}
           <Field
             label="Email address"
             placeholder="you@school.edu"
@@ -96,7 +118,7 @@ export default function RegisterScreen() {
           />
           <Text style={[styles.passwordHint, { color: colors.muted }]}>Use at least 8 characters. Passwords are securely hashed via BCrypt.</Text>
           {!!error && <Text accessibilityRole="alert" style={{ color: colors.danger, fontSize: 13 }}>{error}</Text>}
-          <Button title="Create account" onPress={submit} loading={submitting} disabled={!name.trim() || !email.trim() || password.length < 8 || submitting} />
+          <Button title="Create account" onPress={submit} loading={submitting} disabled={!name.trim() || !username.trim() || !email.trim() || password.length < 8 || submitting} />
         </Animated.View>
         <Text style={[styles.teacherInfo, { color: colors.muted }]}>
           Are you an educator? Teacher access is provisioned by your school with an invitation code. Please contact your RankForge administrator.

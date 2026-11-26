@@ -72,7 +72,7 @@ export default function StudentsScreen() {
       <PageHeader title="Students" subtitle="Find your learners and follow their progress." />
       <View style={[styles.searchWrap, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <Search size={18} color={colors.muted} />
-        <TextInput value={search} onChangeText={setSearch} placeholder="Search name or email" placeholderTextColor={colors.muted} style={[styles.search, { color: colors.text }]} returnKeyType="search" accessibilityLabel="Search students" />
+        <TextInput value={search} onChangeText={setSearch} placeholder="Search name, username, or email" placeholderTextColor={colors.muted} style={[styles.search, { color: colors.text }]} returnKeyType="search" accessibilityLabel="Search students" />
       </View>
       <Pressable accessibilityRole="button" onPress={() => setFiltersOpen((open) => !open)} style={[styles.filterToggle, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         <SlidersHorizontal size={16} color={colors.primary} />
@@ -158,7 +158,7 @@ export default function StudentsScreen() {
             onPress={() =>
               router.push({
                 pathname: "/teacher/student/[studentId]",
-                params: { studentId: item.id, name: item.displayName, grade: item.grade ?? "" },
+                params: { studentId: item.id, name: item.displayName, username: item.username, grade: item.grade ?? "" },
               })
             }
             style={({ pressed }) => [styles.studentItem, { backgroundColor: colors.surface, opacity: pressed ? 0.75 : 1 }]}
@@ -167,11 +167,11 @@ export default function StudentsScreen() {
             {!!item.grade && <Text style={[styles.grade, { color: colors.muted }]}>{item.grade}</Text>}
           </Pressable>
         )}
-        ListFooterComponent={data?.items.length ? <Pagination page={data.page} totalPages={data.totalPages} onChange={(page) => dispatch(setStudentPage(page))} /> : null}
+        ListFooterComponent={data?.items.length ? <Pagination page={data.page} totalPages={data.totalPages} onChange={(page) => dispatch(setStudentPage(page))} /> : undefined}
         contentContainerStyle={[styles.listContent, { paddingHorizontal: horizontalPadding, maxWidth: contentMaxWidth, width: "100%", alignSelf: "center" }]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={isFetching} onRefresh={refetch} tintColor={colors.primary} colors={[colors.primary]} />}
+        refreshControl={<RefreshControl refreshing={isFetching} onRefresh={() => { refetch(); }} tintColor={colors.primary} colors={[colors.primary]} />}
       />
     </Screen>
   );

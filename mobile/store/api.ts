@@ -32,7 +32,14 @@ export const rankForgeApi = createApi({
     login: builder.mutation<AuthResponse, { email: string; password: string }>({
       query: (body) => ({ url: "/auth/login", method: "POST", body }),
     }),
-    register: builder.mutation<AuthResponse, { email: string; password: string; displayName: string }>({
+    register: builder.mutation<AuthResponse, {
+      fullName: string;
+      username: string;
+      email: string;
+      password: string;
+      role?: User["role"];
+      invitationCode?: string;
+    }>({
       query: (body) => ({ url: "/auth/register", method: "POST", body }),
     }),
     me: builder.query<User, void>({

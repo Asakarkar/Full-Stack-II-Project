@@ -7,15 +7,16 @@ public record LeaderboardEntryResponse(
                 Long rank,
                 UUID studentId,
                 UUID userId,
+                String username,
                 String fullName,
                 Long totalPoints) {
-    @JsonProperty("displayName")
-    public String displayName() {
-        return fullName;
-    }
+        @JsonProperty("displayName")
+        public String displayName() {
+                return fullName;
+        }
 
-    @JsonProperty("points")
-    public Long points() {
-        return totalPoints;
-    }
+        @JsonProperty("points")
+        public Long points() {
+                return totalPoints;
+        }
 }

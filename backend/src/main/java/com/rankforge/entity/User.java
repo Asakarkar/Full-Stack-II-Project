@@ -25,6 +25,9 @@ public class User extends AuditedEntity implements UserDetails {
     @Column(name = "full_name", nullable = false, length = 100)
     private String fullName;
 
+    @Column(name = "username", nullable = false, unique = true, length = 50)
+    private String accountUsername;
+
     @Column(nullable = false, unique = true, length = 255)
     private String email;
 
@@ -38,16 +41,18 @@ public class User extends AuditedEntity implements UserDetails {
     protected User() {
     }
 
-    public User(String fullName, String email, String passwordHash, Role role) {
+    public User(String accountUsername, String fullName, String email, String passwordHash, Role role) {
         this.id = UUID.randomUUID();
+        this.accountUsername = normalizeAccountUsername(accountUsername);
         this.fullName = fullName != null ? fullName.trim() : "";
         this.email = email != null ? email.trim().toLowerCase(Locale.ROOT) : "";
         this.passwordHash = passwordHash;
         this.role = role != null ? role : Role.STUDENT;
     }
 
-    public User(UUID id, String fullName, String email, String passwordHash, Role role) {
+    public User(UUID id, String accountUsername, String fullName, String email, String passwordHash, Role role) {
         this.id = id != null ? id : UUID.randomUUID();
+        this.accountUsername = normalizeAccountUsername(accountUsername);
         this.fullName = fullName != null ? fullName.trim() : "";
         this.email = email != null ? email.trim().toLowerCase(Locale.ROOT) : "";
         this.passwordHash = passwordHash;
@@ -64,6 +69,14 @@ public class User extends AuditedEntity implements UserDetails {
 
     public String getFullName() {
         return fullName;
+    }
+
+    public String getAccountUsername() {
+        return accountUsername;
+    }
+
+    public void setAccountUsername(String accountUsername) {
+        this.accountUsername = normalizeAccountUsername(accountUsername);
     }
 
     public void setFullName(String fullName) {
@@ -107,6 +120,10 @@ public class User extends AuditedEntity implements UserDetails {
     @Override
     public String getUsername() {
         return email;
+    }
+
+    private String normalizeAccountUsername(String username) {
+        return username != null ? username.trim().toLowerCase(Locale.ROOT) : "";
     }
 
     @Override

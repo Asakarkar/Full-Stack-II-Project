@@ -21,6 +21,7 @@ export function StudentRow({ student, trailing }: { student: Student | Leaderboa
   const { colors } = useTheme();
   const isLeaderboardEntry = "studentId" in student;
   const name = student.displayName;
+  const username = student.username;
   const points = isLeaderboardEntry ? student.points : student.pointsBalance;
   const email = "email" in student ? student.email : undefined;
   return (
@@ -30,6 +31,7 @@ export function StudentRow({ student, trailing }: { student: Student | Leaderboa
         <Avatar name={name} size={40} />
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text numberOfLines={1} style={[styles.personName, { color: colors.text }]}>{name}</Text>
+          {!!username && <Text numberOfLines={1} style={[styles.personSub, { color: colors.primary }]}>@{username}</Text>}
           {!!email && <Text numberOfLines={1} style={[styles.personSub, { color: colors.muted }]}>{email}</Text>}
         </View>
       </View>

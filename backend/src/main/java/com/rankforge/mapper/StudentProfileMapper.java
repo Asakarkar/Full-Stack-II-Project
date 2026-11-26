@@ -15,13 +15,13 @@ public class StudentProfileMapper {
         return new StudentProfileResponse(
                 profile.getId(),
                 profile.getUser() != null ? profile.getUser().getId() : null,
+                profile.getUser() != null ? profile.getUser().getAccountUsername() : null,
                 profile.getUser() != null ? profile.getUser().getFullName() : null,
                 profile.getUser() != null ? profile.getUser().getEmail() : null,
                 profile.getTotalPoints(),
                 rank,
                 profile.getCreatedAt(),
-                profile.getUpdatedAt()
-        );
+                profile.getUpdatedAt());
     }
 
     public LeaderboardEntryResponse toLeaderboardEntry(StudentProfile profile, Long rank) {
@@ -32,10 +32,8 @@ public class StudentProfileMapper {
                 rank,
                 profile.getId(),
                 profile.getUser() != null ? profile.getUser().getId() : null,
+                profile.getUser() != null ? profile.getUser().getAccountUsername() : null,
                 profile.getUser() != null ? profile.getUser().getFullName() : null,
-                profile.getTotalPoints()
-        );
+                profile.getTotalPoints());
     }
 }
-
-
