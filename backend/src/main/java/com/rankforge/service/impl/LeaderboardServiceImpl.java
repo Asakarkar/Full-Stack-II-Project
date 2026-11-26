@@ -2,11 +2,15 @@ package com.rankforge.service.impl;
 
 import com.rankforge.dto.response.LeaderboardEntryResponse;
 import com.rankforge.dto.response.PagedResponse;
+import com.rankforge.dto.response.PointTransactionResponse;
+import com.rankforge.entity.PointTransaction;
 import com.rankforge.entity.StudentProfile;
 import com.rankforge.entity.User;
 import com.rankforge.exception.BadRequestException;
 import com.rankforge.exception.ResourceNotFoundException;
+import com.rankforge.mapper.PointTransactionMapper;
 import com.rankforge.mapper.StudentProfileMapper;
+import com.rankforge.repository.PointTransactionRepository;
 import com.rankforge.repository.StudentProfileRepository;
 import com.rankforge.service.LeaderboardService;
 import org.springframework.data.domain.Page;
@@ -25,18 +29,17 @@ import java.util.Set;
 public class LeaderboardServiceImpl implements LeaderboardService {
 
     private static final Set<String> WHITELISTED_SORT_FIELDS = Set.of(
-            "totalPoints", "points", "total_points", "id", "displayName", "name", "fullName", "createdAt", "grade"
-    );
+            "totalPoints", "points", "total_points", "id", "displayName", "name", "fullName", "createdAt", "grade");
 
     private final StudentProfileRepository studentProfileRepository;
     private final StudentProfileMapper studentProfileMapper;
-    private final com.rankforge.repository.PointTransactionRepository pointTransactionRepository;
-    private final com.rankforge.mapper.PointTransactionMapper pointTransactionMapper;
+    private final PointTransactionRepository pointTransactionRepository;
+    private final PointTransactionMapper pointTransactionMapper;
 
     public LeaderboardServiceImpl(StudentProfileRepository studentProfileRepository,
-            StudentProfileMapper studentProfileMapper,
-            com.rankforge.repository.PointTransactionRepository pointTransactionRepository,
-            com.rankforge.mapper.PointTransactionMapper pointTransactionMapper) {
+                                  StudentProfileMapper studentProfileMapper,
+                                  PointTransactionRepository pointTransactionRepository,
+                                  PointTransactionMapper pointTransactionMapper) {
         this.studentProfileRepository = studentProfileRepository;
         this.studentProfileMapper = studentProfileMapper;
         this.pointTransactionRepository = pointTransactionRepository;
@@ -80,17 +83,20 @@ public class LeaderboardServiceImpl implements LeaderboardService {
         try {
             sortDirection = Sort.Direction.valueOf(effectiveDirection.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Invalid sort direction: '" + effectiveDirection + "'. Allowed values are: ASC, DESC");
+            throw new BadRequestException(
+                    "Invalid sort direction: '" + effectiveDirection + "'. Allowed values are: ASC, DESC");
         }
 
         // Leaderboard sorts totalPoints DESC by default, breaking ties by immutable
         // student UUID ASC
         Sort sort;
-        if ("totalPoints".equalsIgnoreCase(rawField) || "points".equalsIgnoreCase(rawField) || "total_points".equalsIgnoreCase(rawField) || "grade".equalsIgnoreCase(rawField)) {
+        if ("totalPoints".equalsIgnoreCase(rawField) || "points".equalsIgnoreCase(rawField)
+                || "total_points".equalsIgnoreCase(rawField) || "grade".equalsIgnoreCase(rawField)) {
             sort = Sort.by(new Sort.Order(sortDirection, "totalPoints"), new Sort.Order(Sort.Direction.ASC, "id"));
         } else if ("id".equalsIgnoreCase(rawField)) {
             sort = Sort.by(new Sort.Order(sortDirection, "id"));
-        } else if ("displayName".equalsIgnoreCase(rawField) || "name".equalsIgnoreCase(rawField) || "fullName".equalsIgnoreCase(rawField)) {
+        } else if ("displayName".equalsIgnoreCase(rawField) || "name".equalsIgnoreCase(rawField)
+                || "fullName".equalsIgnoreCase(rawField)) {
             sort = Sort.by(new Sort.Order(sortDirection, "user.fullName"), new Sort.Order(Sort.Direction.ASC, "id"));
         } else if ("createdAt".equalsIgnoreCase(rawField)) {
             sort = Sort.by(new Sort.Order(sortDirection, "createdAt"), new Sort.Order(Sort.Direction.ASC, "id"));
@@ -124,8 +130,7 @@ public class LeaderboardServiceImpl implements LeaderboardService {
 
     @Override
     @Transactional(readOnly = true)
-    public com.rankforge.dto.response.PagedResponse<com.rankforge.dto.response.PointTransactionResponse> getRecentActivity(
-            int page, int size) {
+    public PagedResponse<PointTransactionResponse> getRecentActivity(int page, int size) {
         if (page < 0) {
             throw new BadRequestException("Page index cannot be negative");
         }
@@ -133,7 +138,7 @@ public class LeaderboardServiceImpl implements LeaderboardService {
             throw new BadRequestException("Page size must be between 1 and 100");
         }
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<com.rankforge.entity.PointTransaction> txPage = pointTransactionRepository.findAll(pageable);
-        return com.rankforge.dto.response.PagedResponse.from(txPage.map(pointTransactionMapper::toResponse));
+        Page<PointTransaction> txPage = pointTransactionRepository.findAll(pageable);
+        return PagedResponse.from(txPage.map(pointTransactionMapper::toResponse));
     }
 }

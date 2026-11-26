@@ -47,26 +47,40 @@ export default function PointsScreen() {
           </Pressable>;
         })}
       </View>
-      {isLoading ? <LoadingState label="Loading your point history…" /> : isError ? <ErrorState message={getErrorMessage(error, "Unable to load point history.")} onRetry={refetch} /> : data?.items.length ? (
+      {isLoading ? (
+        <LoadingState label="Loading your point history…" />
+      ) : isError ? (
+        <ErrorState message={getErrorMessage(error, "Unable to load point history.")} onRetry={refetch} />
+      ) : data?.items.length ? (
         <>
-          <Card>{data.items.map((entry, index) => {
-            const positive = isPositiveEntry(entry.type);
-            const Icon = positive ? ArrowDownLeft : ArrowUpRight;
-            return <View key={entry.id} style={{ gap: 13 }}>
-              {index > 0 && <View style={[styles.divider, { backgroundColor: colors.border }]} />}
-              <View style={styles.entry}>
-                <View style={[styles.entryIcon, { backgroundColor: positive ? `${colors.accent}20` : `${colors.warning}20` }]}><Icon size={16} color={positive ? colors.accent : colors.warning} /></View>
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.entryTitle, { color: colors.text }]}>{entry.reason || entry.type}</Text>
-                  <Text style={[styles.entryDate, { color: colors.muted }]}>{formatDate(entry.createdAt)}</Text>
+          <Card>
+            {data.items.map((entry, index) => {
+              const positive = isPositiveEntry(entry.type);
+              const Icon = positive ? ArrowDownLeft : ArrowUpRight;
+              return (
+                <View key={entry.id} style={{ gap: 13 }}>
+                  {index > 0 && <View style={[styles.divider, { backgroundColor: colors.border }]} />}
+                  <View style={styles.entry}>
+                    <View style={[styles.entryIcon, { backgroundColor: positive ? `${colors.accent}20` : `${colors.warning}20` }]}>
+                      <Icon size={16} color={positive ? colors.accent : colors.warning} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={[styles.entryTitle, { color: colors.text }]}>{entry.reason || entry.type}</Text>
+                      <Text style={[styles.entryDate, { color: colors.muted }]}>{formatDate(entry.createdAt)}</Text>
+                    </View>
+                    <Text style={{ color: positive ? colors.accent : colors.danger, fontWeight: "800", fontSize: 14 }}>
+                      {positive ? "+" : "−"}{Math.abs(entry.amount)}
+                    </Text>
+                  </View>
                 </View>
-                <Text style={{ color: positive ? colors.accent : colors.danger, fontWeight: "800", fontSize: 14 }}>{positive ? "+" : "−"}{Math.abs(entry.amount)}</Text>
-              </View>
-            </View>;
-          })}</Card>
+              );
+            })}
+          </Card>
           <Pagination page={data.page} totalPages={data.totalPages} onChange={(page) => dispatch(setPointsPage(page))} />
         </>
-      ) : <EmptyState title="Your first points are waiting" message="Complete a learning activity to see your points history." />}
+      ) : (
+        <EmptyState title="Your first points are waiting" message="Complete a learning activity to see your points history." />
+      )}
     </Screen>
   );
 }

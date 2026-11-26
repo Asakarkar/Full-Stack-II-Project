@@ -24,15 +24,16 @@ public class PointAdjustmentExecutor {
     private final PointTransactionMapper pointTransactionMapper;
 
     public PointAdjustmentExecutor(StudentProfileRepository studentProfileRepository,
-                                   PointTransactionRepository pointTransactionRepository,
-                                   PointTransactionMapper pointTransactionMapper) {
+            PointTransactionRepository pointTransactionRepository,
+            PointTransactionMapper pointTransactionMapper) {
         this.studentProfileRepository = studentProfileRepository;
         this.pointTransactionRepository = pointTransactionRepository;
         this.pointTransactionMapper = pointTransactionMapper;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public PointTransactionResponse executePointAdjustment(UUID studentId, User teacher, int deltaPoints, String reason) {
+    public PointTransactionResponse executePointAdjustment(UUID studentId, User teacher, int deltaPoints,
+            String reason) {
         StudentProfile student = studentProfileRepository.findWithUserById(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found with ID: " + studentId));
 

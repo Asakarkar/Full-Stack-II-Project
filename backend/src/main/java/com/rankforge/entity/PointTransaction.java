@@ -48,7 +48,8 @@ public class PointTransaction {
         this.createdAt = Instant.now();
     }
 
-    public PointTransaction(UUID id, StudentProfile student, User teacher, Integer deltaPoints, String reason, Instant createdAt) {
+    public PointTransaction(UUID id, StudentProfile student, User teacher, Integer deltaPoints, String reason,
+            Instant createdAt) {
         this.id = id != null ? id : UUID.randomUUID();
         this.student = student;
         this.teacher = teacher;
@@ -112,5 +113,3 @@ public class PointTransaction {
         this.createdAt = createdAt;
     }
 }
-
-

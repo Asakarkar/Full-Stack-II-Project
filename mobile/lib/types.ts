@@ -146,6 +146,12 @@ export interface TeacherDashboard {
   transactionsToday: number;
   pointsAwardedToday: number;
   pointsDeductedToday: number;
+  totalStudents?: number;
+  totalPointsDistributed?: number;
+  totalTransactions?: number;
+  todayTransactions?: number;
+  todayAwardedPoints?: number;
+  todayDeductedPoints?: number;
 }
 
 export interface StudentAnalytics {

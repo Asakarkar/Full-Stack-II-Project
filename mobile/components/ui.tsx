@@ -93,12 +93,27 @@ export function PageHeader({ title, subtitle, back = false, right }: { title: st
 
 export function Card({ children, style }: PropsWithChildren<{ style?: StyleProp<ViewStyle> }>) {
   const { colors } = useTheme();
-  return <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border, shadowColor: "#25224A" }, style]}>{children}</View>;
+  return (
+    <View
+      style={[
+        styles.card,
+        { backgroundColor: colors.surface, borderColor: colors.border, shadowColor: "#25224A" },
+        style,
+      ]}
+    >
+      {children}
+    </View>
+  );
 }
 
 export function SectionTitle({ title, action }: { title: string; action?: React.ReactNode }) {
   const { colors } = useTheme();
-  return <View style={styles.sectionTitle}><Text style={[styles.sectionHeading, { color: colors.text }]}>{title}</Text>{action}</View>;
+  return (
+    <View style={styles.sectionTitle}>
+      <Text style={[styles.sectionHeading, { color: colors.text }]}>{title}</Text>
+      {action}
+    </View>
+  );
 }
 
 export function BodyText({ children, style }: PropsWithChildren<{ style?: StyleProp<any> }>) {
@@ -130,7 +145,14 @@ export function Field({ label, trailing, style: inputStyle, ...props }: TextInpu
   );
 }
 
-export function Button({ title, onPress, variant = "primary", disabled = false, loading = false, icon }: {
+export function Button({
+  title,
+  onPress,
+  variant = "primary",
+  disabled = false,
+  loading = false,
+  icon,
+}: {
   title: string;
   onPress: () => void;
   variant?: "primary" | "secondary" | "ghost" | "danger";
@@ -139,15 +161,43 @@ export function Button({ title, onPress, variant = "primary", disabled = false, 
   icon?: React.ReactNode;
 }) {
   const { colors } = useTheme();
-  const backgroundColor = variant === "primary" ? colors.primary : variant === "danger" ? colors.danger : variant === "secondary" ? colors.raised : "transparent";
+  const backgroundColor =
+    variant === "primary"
+      ? colors.primary
+      : variant === "danger"
+      ? colors.danger
+      : variant === "secondary"
+      ? colors.raised
+      : "transparent";
   const textColor = variant === "primary" || variant === "danger" ? "#FFFFFF" : colors.text;
+
   const handlePress = () => {
     void Haptics.selectionAsync().catch(() => undefined);
     onPress();
   };
+
   return (
-    <Pressable accessibilityRole="button" disabled={disabled || loading} onPress={handlePress} style={({ pressed }) => [styles.button, { backgroundColor, borderColor: colors.border, opacity: disabled ? 0.55 : pressed ? 0.83 : 1 }]}>
-      {loading ? <ActivityIndicator color={textColor} /> : <>{icon}{<Text style={[styles.buttonText, { color: textColor }]}>{title}</Text>}</>}
+    <Pressable
+      accessibilityRole="button"
+      disabled={disabled || loading}
+      onPress={handlePress}
+      style={({ pressed }) => [
+        styles.button,
+        {
+          backgroundColor,
+          borderColor: colors.border,
+          opacity: disabled ? 0.55 : pressed ? 0.83 : 1,
+        },
+      ]}
+    >
+      {loading ? (
+        <ActivityIndicator color={textColor} />
+      ) : (
+        <>
+          {icon}
+          <Text style={[styles.buttonText, { color: textColor }]}>{title}</Text>
+        </>
+      )}
     </Pressable>
   );
 }
@@ -155,18 +205,35 @@ export function Button({ title, onPress, variant = "primary", disabled = false, 
 export function LoadingState({ label = "Loading your learning data…" }: { label?: string }) {
   const { colors } = useTheme();
   const pulse = useSharedValue(0.4);
+
   React.useEffect(() => {
     pulse.value = withRepeat(withTiming(0.8, { duration: 850 }), -1, true);
   }, [pulse]);
+
   const animatedStyle = useAnimatedStyle(() => ({ opacity: pulse.value }));
-  return <View style={styles.state}>
-    <Text style={[styles.stateText, { color: colors.muted }]}>{label}</Text>
-    {[0, 1, 2].map((row) => <Animated.View key={row} style={[styles.skeletonRow, { backgroundColor: colors.surface, borderColor: colors.border }, animatedStyle]}>
-      <View style={[styles.skeletonCircle, { backgroundColor: colors.raised }]} />
-      <View style={styles.skeletonLines}><View style={[styles.skeletonLine, { backgroundColor: colors.raised, width: row === 0 ? "63%" : "52%" }]} /><View style={[styles.skeletonLine, { backgroundColor: colors.raised, width: "37%" }]} /></View>
-      <View style={[styles.skeletonValue, { backgroundColor: colors.raised }]} />
-    </Animated.View>)}
-  </View>;
+
+  return (
+    <View style={styles.state}>
+      <Text style={[styles.stateText, { color: colors.muted }]}>{label}</Text>
+      {[0, 1, 2].map((row) => (
+        <Animated.View
+          key={row}
+          style={[
+            styles.skeletonRow,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+            animatedStyle,
+          ]}
+        >
+          <View style={[styles.skeletonCircle, { backgroundColor: colors.raised }]} />
+          <View style={styles.skeletonLines}>
+            <View style={[styles.skeletonLine, { backgroundColor: colors.raised, width: row === 0 ? "63%" : "52%" }]} />
+            <View style={[styles.skeletonLine, { backgroundColor: colors.raised, width: "37%" }]} />
+          </View>
+          <View style={[styles.skeletonValue, { backgroundColor: colors.raised }]} />
+        </Animated.View>
+      ))}
+    </View>
+  );
 }
 
 export function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
@@ -176,12 +243,25 @@ export function ErrorState({ message, onRetry }: { message: string; onRetry?: ()
       <AlertCircle size={23} color={colors.danger} />
       <Text style={[styles.stateTitle, { color: colors.text }]}>We couldn’t load this</Text>
       <Text style={[styles.stateText, { color: colors.muted }]}>{message}</Text>
-      {onRetry && <Button title="Try again" variant="secondary" onPress={onRetry} icon={<RefreshCw size={16} color={colors.text} />} />}
+      {onRetry && (
+        <Button
+          title="Try again"
+          variant="secondary"
+          onPress={onRetry}
+          icon={<RefreshCw size={16} color={colors.text} />}
+        />
+      )}
     </View>
   );
 }
 
-export function EmptyState({ title = "Nothing here yet", message = "Check back when new learning activity is available." }: { title?: string; message?: string }) {
+export function EmptyState({
+  title = "Nothing here yet",
+  message = "Check back when new learning activity is available.",
+}: {
+  title?: string;
+  message?: string;
+}) {
   const { colors } = useTheme();
   return (
     <View style={[styles.stateCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -196,9 +276,25 @@ export function Pagination({ page, totalPages, onChange }: { page: number; total
   const { colors } = useTheme();
   return (
     <View style={styles.pagination}>
-      <Pressable accessibilityLabel="Previous page" disabled={page <= 1} onPress={() => onChange(page - 1)} style={[styles.pageArrow, { borderColor: colors.border, opacity: page <= 1 ? 0.4 : 1 }]}><ChevronLeft size={19} color={colors.text} /></Pressable>
-      <Text style={[styles.pageLabel, { color: colors.muted }]}>Page <Text style={{ color: colors.text, fontWeight: "700" }}>{page}</Text> of {Math.max(1, totalPages)}</Text>
-      <Pressable accessibilityLabel="Next page" disabled={page >= totalPages} onPress={() => onChange(page + 1)} style={[styles.pageArrow, { borderColor: colors.border, opacity: page >= totalPages ? 0.4 : 1 }]}><ChevronRight size={19} color={colors.text} /></Pressable>
+      <Pressable
+        accessibilityLabel="Previous page"
+        disabled={page <= 1}
+        onPress={() => onChange(page - 1)}
+        style={[styles.pageArrow, { borderColor: colors.border, opacity: page <= 1 ? 0.4 : 1 }]}
+      >
+        <ChevronLeft size={19} color={colors.text} />
+      </Pressable>
+      <Text style={[styles.pageLabel, { color: colors.muted }]}>
+        Page <Text style={{ color: colors.text, fontWeight: "700" }}>{page}</Text> of {Math.max(1, totalPages)}
+      </Text>
+      <Pressable
+        accessibilityLabel="Next page"
+        disabled={page >= totalPages}
+        onPress={() => onChange(page + 1)}
+        style={[styles.pageArrow, { borderColor: colors.border, opacity: page >= totalPages ? 0.4 : 1 }]}
+      >
+        <ChevronRight size={19} color={colors.text} />
+      </Pressable>
     </View>
   );
 }

@@ -2,6 +2,8 @@ package com.rankforge.service.impl;
 
 import com.rankforge.dto.response.PagedResponse;
 import com.rankforge.dto.response.PointTransactionResponse;
+import com.rankforge.dto.response.StudentAnalyticsResponse;
+import com.rankforge.dto.response.StudentDashboardResponse;
 import com.rankforge.dto.response.StudentProfileResponse;
 import com.rankforge.entity.PointTransaction;
 import com.rankforge.entity.Role;
@@ -22,6 +24,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 @Service
@@ -91,7 +95,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     @Transactional(readOnly = true)
-    public com.rankforge.dto.response.StudentDashboardResponse getStudentDashboard(User currentUser) {
+    public StudentDashboardResponse getStudentDashboard(User currentUser) {
         StudentProfile profile = studentProfileRepository.findByUserId(currentUser.getId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Student profile not found for user: " + currentUser.getEmail()));
@@ -107,7 +111,7 @@ public class StudentServiceImpl implements StudentService {
                 : Math.round((100.0 * (studentCount - rank) / (studentCount - 1)) * 10.0) / 10.0;
 
         StudentProfileResponse profileResponse = studentProfileMapper.toResponse(profile, rank);
-        return new com.rankforge.dto.response.StudentDashboardResponse(
+        return new StudentDashboardResponse(
                 profileResponse,
                 transactionsCount,
                 totalPointsEarned,
@@ -120,24 +124,24 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     @Transactional(readOnly = true)
-    public com.rankforge.dto.response.StudentAnalyticsResponse getStudentAnalytics(User currentUser) {
+    public StudentAnalyticsResponse getStudentAnalytics(User currentUser) {
         StudentProfile profile = studentProfileRepository.findByUserId(currentUser.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Student profile not found for user: " + currentUser.getEmail()));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Student profile not found for user: " + currentUser.getEmail()));
 
         long earned = pointTransactionRepository.sumAwardedByStudentId(profile.getId());
         long deducted = pointTransactionRepository.sumDeductedByStudentId(profile.getId());
         long transactionCount = pointTransactionRepository.countByStudentId(profile.getId());
-        java.time.Instant to = java.time.Instant.now();
-        java.time.Instant from = to.minus(30, java.time.temporal.ChronoUnit.DAYS);
+        Instant to = Instant.now();
+        Instant from = to.minus(30, ChronoUnit.DAYS);
 
-        return new com.rankforge.dto.response.StudentAnalyticsResponse(
+        return new StudentAnalyticsResponse(
                 from,
                 to,
                 earned,
                 deducted,
                 earned - deducted,
-                transactionCount
-        );
+                transactionCount);
     }
 
     private void validateAccessToStudentData(UUID studentId, User currentUser) {

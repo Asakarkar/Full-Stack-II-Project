@@ -2,6 +2,7 @@ package com.rankforge.controller;
 
 import com.rankforge.dto.response.LeaderboardEntryResponse;
 import com.rankforge.dto.response.PagedResponse;
+import com.rankforge.dto.response.PointTransactionResponse;
 import com.rankforge.entity.User;
 import com.rankforge.service.LeaderboardService;
 import org.springframework.http.ResponseEntity;
@@ -38,12 +39,10 @@ public class LeaderboardController {
     }
 
     @GetMapping("/activity")
-    public ResponseEntity<PagedResponse<com.rankforge.dto.response.PointTransactionResponse>> getRecentActivity(
+    public ResponseEntity<PagedResponse<PointTransactionResponse>> getRecentActivity(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "15") int size) {
-        PagedResponse<com.rankforge.dto.response.PointTransactionResponse> response = leaderboardService.getRecentActivity(page, size);
+        PagedResponse<PointTransactionResponse> response = leaderboardService.getRecentActivity(page, size);
         return ResponseEntity.ok(response);
     }
 }
-
-

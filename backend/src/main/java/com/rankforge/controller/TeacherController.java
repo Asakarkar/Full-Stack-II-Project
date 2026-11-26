@@ -6,7 +6,9 @@ import com.rankforge.dto.response.PointTransactionResponse;
 import com.rankforge.dto.response.StudentProfileResponse;
 import com.rankforge.dto.response.TeacherDashboardResponse;
 import com.rankforge.entity.User;
+import com.rankforge.service.LeaderboardService;
 import com.rankforge.service.PointService;
+import com.rankforge.service.StudentService;
 import com.rankforge.service.TeacherService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -30,13 +32,13 @@ public class TeacherController {
 
     private final TeacherService teacherService;
     private final PointService pointService;
-    private final com.rankforge.service.LeaderboardService leaderboardService;
-    private final com.rankforge.service.StudentService studentService;
+    private final LeaderboardService leaderboardService;
+    private final StudentService studentService;
 
     public TeacherController(TeacherService teacherService,
-                             PointService pointService,
-                             com.rankforge.service.LeaderboardService leaderboardService,
-                             com.rankforge.service.StudentService studentService) {
+            PointService pointService,
+            LeaderboardService leaderboardService,
+            StudentService studentService) {
         this.teacherService = teacherService;
         this.pointService = pointService;
         this.leaderboardService = leaderboardService;
@@ -74,7 +76,8 @@ public class TeacherController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @AuthenticationPrincipal User teacher) {
-        PagedResponse<PointTransactionResponse> response = studentService.getStudentTransactions(id, page, size, teacher);
+        PagedResponse<PointTransactionResponse> response = studentService.getStudentTransactions(id, page, size,
+                teacher);
         return ResponseEntity.ok(response);
     }
 

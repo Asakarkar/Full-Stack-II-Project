@@ -1,127 +1,183 @@
 # RankForge — Student Performance, Leaderboard & Academic Evaluation Platform
 
-RankForge is an enterprise-grade academic reward and gamified evaluation platform consisting of a **Spring Boot 3 (Java 25 LTS) REST API**, **PostgreSQL 16** persistence layer with Flyway migrations, and an **Expo React Native (TypeScript)** mobile client with Redux Toolkit and SecureStore.
+RankForge is an academic reward, gamified evaluation, and classroom management platform. It features a high-performance **Spring Boot 3 (Java 25 LTS) REST API**, a relational persistence layer managed via **Flyway migrations** (configured for **MySQL 8** with native support for **PostgreSQL**), and a responsive **React Native / Expo SDK 54** client built with **TypeScript**, **Redux Toolkit**, and **React Native Web**.
 
 ---
 
-## 1. Seeded Demo Development Credentials
+## 1. System Architecture
 
-When starting the application with `rankforge.seed-demo-data: true` (default in dev), the following test accounts are automatically provisioned:
+```
+├── backend/                  # Spring Boot 3 REST API
+│   ├── src/main/java/        # Clean layered architecture (Controllers, Services, DTOs, Entities, Security)
+│   ├── src/main/resources/   # Application configuration & Flyway database migrations
+│   └── pom.xml               # Maven configuration (Java 25 LTS, Spring Boot 3)
+│
+├── mobile/                   # Cross-Platform React Native Client (Expo SDK 54)
+│   ├── app/                  # Expo Router tab and auth navigation routes
+│   ├── components/           # Reusable responsive UI cards, charts, sheets, and inputs
+│   ├── hooks/                # Custom responsive and viewport hooks
+│   ├── store/                # Redux Toolkit state slices (auth, leaderboard, points)
+│   └── lib/                  # API client, secure storage, and TypeScript domain models
+```
 
-| Role | Name | Email | Password | Initial Points / State |
+### Technology Stack
+- **Frontend**: React Native, Expo SDK 54, Expo Router, TypeScript, Redux Toolkit, React Native Web, Lucide Icons, Reanimated.
+- **Backend**: Java 25 LTS, Spring Boot 3.x, Spring Security 6, Spring Data JPA, Hibernate, Flyway.
+- **Database**: MySQL 8.0 (default local configuration) / PostgreSQL compatible, with automated Flyway schema versioning.
+- **Design & Layout**: Responsive adaptive design adjusting automatically across mobile phones, tablets, and desktop browsers.
+
+---
+
+## 2. Seeded Demo Development Credentials
+
+When starting the application with `rankforge.seed-demo-data: true` (default in development), the database automatically seeds the following accounts:
+
+| Role | Name | Email | Password | Initial State / Points |
 | :--- | :--- | :--- | :--- | :--- |
-| **TEACHER** | Professor Eleanor Davis | `teacher@rankforge.edu` | `Teacher123!` | Provisioned with full evaluation & point adjustment authority |
+| **TEACHER** | Professor Eleanor Davis | `teacher@rankforge.edu` | `Teacher123!` | Class evaluation authority, point awards & deductions |
 | **STUDENT** | Alice Vance | `alice@rankforge.edu` | `Student123!` | 120 pts (Tie: Competition Rank #1) |
-| **STUDENT** | Bob Martinez | `bob@rankforge.edu` | `Student123!` | 120 pts (Tie: Competition Rank #1 - tie demo) |
+| **STUDENT** | Bob Martinez | `bob@rankforge.edu` | `Student123!` | 120 pts (Tie: Competition Rank #1 - tiebreak demo) |
 | **STUDENT** | Charlie Chen | `charlie@rankforge.edu` | `Student123!` | 95 pts (Competition Rank #3) |
 | **STUDENT** | Diana Prince | `diana@rankforge.edu` | `Student123!` | 50 pts (Competition Rank #4) |
 | **STUDENT** | Ethan Hunt | `ethan@rankforge.edu` | `Student123!` | 15 pts (Competition Rank #5) |
 
-> **Teacher Provisioning Secret**: `DEV-TEACHER-SECRET-KEY` (Required when registering a new `TEACHER` account via `POST /api/v1/auth/register`).
+> **Teacher Provisioning Secret**: `DEV-TEACHER-SECRET-KEY` (or `RANKFORGE-TEACHER-SECRET-KEY-2026`). Required when registering a new `TEACHER` account to prevent unauthorized privilege escalation.
 
 ---
 
-## 2. Quickstart & Installation
+## 3. Quickstart & Installation
 
-### Option A: Docker Compose (Full Backend Stack)
-From project root:
-```bash
-docker-compose up --build
+### A. Backend Setup
+
+#### 1. Database Configuration
+By default, the backend connects to MySQL on `127.0.0.1:3306`. Configure credentials via environment variables or `backend/.env`:
+
+```env
+DB_URL=jdbc:mysql://127.0.0.1:3306/rankforge?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+DB_USERNAME=root
+DB_PASSWORD=your_password
+PORT=8080
+JWT_SECRET=dGVzdC1zZWNyZXQta2V5LXNob3VsZC1iZS1hdC1sZWFzdC0yNTYtYml0cy1sb25nLWZvci1oczI1NiE=
+TEACHER_INVITATION_CODE=DEV-TEACHER-SECRET-KEY
+SEED_DEMO_DATA=true
 ```
-PostgreSQL runs on port `5432` and Spring Boot API runs on `http://localhost:8080/api/v1`.
 
-### Option B: Local Backend (Maven)
-1. Start PostgreSQL:
-   ```bash
-   createdb rankforge
-   ```
-2. Configure environment:
-   ```bash
-   export DB_URL="jdbc:postgresql://localhost:5432/rankforge"
-   export DB_USERNAME="postgres"
-   export DB_PASSWORD="postgres_password"
-   export JWT_SECRET="dGhpcy1pcy1hLXNlY3VyZS0yNTYtYml0LXJhbmstZm9yZ2Utc2VjcmV0LWtleS0yMDI2"
-   export TEACHER_INVITATION_CODE="DEV-TEACHER-SECRET-KEY"
-   ```
-3. Run backend:
-   ```bash
-   cd backend
-   mvn spring-boot:run
-   ```
+*(For PostgreSQL, update `DB_URL=jdbc:postgresql://localhost:5432/rankforge` and driver configuration in `application.yml`).*
 
-### Option C: Mobile Client (Expo)
-1. Navigate to mobile directory:
-   ```bash
-   cd mobile
-   npm install
-   ```
-2. Configure `.env`:
-   ```bash
-   # Replace with your development machine's LAN IP for physical Android/iOS devices:
-   EXPO_PUBLIC_API_URL=http://192.168.1.50:8080/api/v1
-   ```
-   *(Note: On Android Emulator, `10.0.2.2:8080/api/v1` is automatically resolved if `EXPO_PUBLIC_API_URL` is omitted).*
-3. Start Expo:
-   ```bash
-   npx expo start
-   ```
+#### 2. Run the Backend
+```bash
+cd backend
+mvn compile
+mvn spring-boot:run
+```
+The REST API will start at `http://localhost:8080`. Flyway automatically executes migrations on startup.
 
 ---
 
-## 3. Live Demo Scenario Script (Steps 1 to 12)
+### B. Mobile App Setup (Expo)
 
-| Step | Action | Expected Behavior & Verification Point |
+#### 1. Install Dependencies
+```bash
+cd mobile
+npm install
+```
+
+#### 2. Configure Environment
+Create or edit `mobile/.env`:
+```env
+# For local web development:
+EXPO_PUBLIC_API_URL=http://localhost:8080/api/v1
+
+# For physical mobile device on LAN:
+# EXPO_PUBLIC_API_URL=http://192.168.x.x:8080/api/v1
+
+# For Android Emulator:
+# EXPO_PUBLIC_API_URL=http://10.0.2.2:8080/api/v1
+```
+
+#### 3. Start the Application
+- **Web Browser (Desktop/Tablet/Mobile view)**:
+  ```bash
+  npm run web
+  ```
+- **Expo Go / Emulator (Android / iOS)**:
+  ```bash
+  npm start
+  ```
+
+---
+
+## 4. Key Platform Features
+
+- **Role-Based Access Control**:
+  - **Students**: View personalized dashboard, rank movement, milestone progress, competition leaderboard, and private transaction ledger.
+  - **Teachers**: Access class management directory, search and filter students, award/deduct points with mandatory reason tracking, and view real-time class activity feeds.
+- **Competition Ranking Engine**:
+  - Deterministic tie-breaking using student ID.
+  - Efficient database ranking without expensive table scans (`1 + COUNT(*) WHERE total_points > :points`).
+- **Audit-Logged Point Transactions**:
+  - Every point change creates an immutable `point_transactions` audit log.
+  - Prevents balance deductions below zero.
+  - Uses optimistic locking (`@Version`) with automatic retry to eliminate race conditions under concurrent updates.
+- **Adaptive Cross-Platform UI**:
+  - Fluid responsiveness with breakpoint detection (`useResponsive`).
+  - Optimized layouts for mobile screens, tablets (split view/grids), and wide desktop displays.
+  - Integrated theme engine supporting Dark and Light modes persisted across sessions.
+
+---
+
+## 5. API Reference Summary
+
+The backend supports both `/api/v1/` and `/api/` route prefixes.
+
+### Authentication (`/api/v1/auth`)
+| Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| **1** | Register or log in as a student | Log in with `alice@rankforge.edu` / `Student123!`. JWT is stored in `SecureStore`. |
-| **2** | Show student dashboard and leaderboard | Alice sees her pinned rank card (`YOUR RANK: #1`, `120 pts`), progress bar to *Gold Achiever*, top-three podium, and student list. |
-| **3** | Restart app / reload simulator | App displays `<BootSplash />`, reads token from `SecureStore`, validates session with `/auth/me`, and restores Alice without re-entering credentials. |
-| **4** | Switch to dark mode | Tap profile theme toggle. `ThemeContext` updates all cards, text, charts, status bar, and persists preference in `AsyncStorage`. |
-| **5** | Log out | Tap Logout. `tokenStorage.clear()` purges SecureStore and state transitions to `UNAUTHENTICATED`. Routed to `/(auth)/login`. |
-| **6** | Log in as teacher | Log in with `teacher@rankforge.edu` / `Teacher123!`. Teacher tab bar activates with `Students` directory and insights. |
-| **7** | Select a student | Open Leaderboard or Students directory and select `Charlie Chen` (currently at 95 pts, Rank #3). |
-| **8** | Award 50 points | Tap **Award**, select preset `+50`, enter reason: *"Exemplary software engineering lab demonstration"*, and tap **Confirm Award**. |
-| **9** | Show updated score & reordered leaderboard | Charlie's score updates immediately to `145 pts`. Global leaderboard refetches: Charlie ascends to **#1**, moving Alice and Bob to **#2**! |
-| **10** | Log in as student & verify updated points | Log out and log in as `charlie@rankforge.edu` / `Student123!`. Pinned rank card reflects `#1`, `145 pts`, and updated milestone tier. |
-| **11** | Verify student cannot access teacher actions | As Charlie, observe that no Award/Deduct buttons exist. Attempting to navigate to `/teacher/...` triggers immediate redirection to `/(tabs)`. |
-| **12** | Demonstrate pagination, sorting & history | Toggle sorting between Points and Name. Click **Recent Activity** tab to inspect live transaction ledger entries backed by `point_transactions`. |
-
----
-
-## 4. API Specification Summary
-
-### Auth Endpoints (`/api/v1/auth`)
-- `POST /register`: Register student or teacher (teacher requires `invitationCode`).
-- `POST /login`: Authenticate with email/password, returns JWT Bearer token.
-- `GET /me`: Returns authenticated user profile.
+| `POST` | `/register` | Register student or teacher (teacher requires `invitationCode`) |
+| `POST` | `/login` | Authenticate with email/password, returns JWT token |
+| `GET` | `/me` | Fetch authenticated user profile |
 
 ### Student Endpoints (`/api/v1/students`)
-- `GET /me`: Student profile with database-calculated competition rank.
-- `GET /{id}`: Student profile (restricted to self or teachers).
-- `GET /{id}/transactions`: Paginated historical point ledger entries.
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/me` (or `/profile`) | Current student profile & calculated rank |
+| `GET` | `/dashboard` | Student dashboard statistics & recent performance |
+| `GET` | `/analytics` | Reporting period metrics (earned, deducted, net points) |
+| `GET` | `/points` | Paginated personal point transaction history |
+| `GET` | `/{id}` | Student profile by ID (restricted to self or teachers) |
+| `GET` | `/{id}/transactions` | Historical transactions for a student |
 
 ### Leaderboard Endpoints (`/api/v1/leaderboard`)
-- `GET /`: Paginated leaderboard sorted by `totalPoints DESC, id ASC` with competition ranks.
-- `GET /me`: Authenticated student's competition rank and score without table scan.
-- `GET /activity`: Recent point transactions activity feed.
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/` | Paginated global leaderboard (sorted by points & ID) |
+| `GET` | `/me` | Direct lookup of student's own leaderboard standing |
+| `GET` | `/activity` | Recent point transactions ledger feed |
 
 ### Teacher Endpoints (`/api/v1/teacher`)
-- `GET /dashboard`: Aggregate statistics (students count, points awarded/deducted today).
-- `GET /students`: Paginated student search with filtering by name, email, points range.
-- `POST /students/{id}/points`: Atomic point award/deduction with ledger audit trail.
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/dashboard` | Aggregate classroom stats & daily distributed points |
+| `GET` | `/students` | Paginated student directory with search & filters |
+| `GET` | `/points` | Recent classroom-wide point activity feed |
+| `GET` | `/students/{id}/points` | Transaction ledger for a specific student |
+| `POST` | `/students/{id}/points` | Adjust points (positive or negative) with audit reason |
+| `POST` | `/students/{id}/points/award` | Award points with reason |
+| `POST` | `/students/{id}/points/deduct` | Deduct points with reason |
 
 ---
 
-## 5. Verification & Test Summary
+## 6. Development & Code Quality Checks
 
-- **Backend Test Suite**: 41 passed, 0 failed, 0 errors (`mvn test`).
-- **Mobile Test Suite**: 53 passed, 0 failed, 0 errors across 10 test suites (`npm test`).
-- **TypeScript & Lint**: 0 compilation errors (`tsc --noEmit`), 0 lint warnings (`eslint .`).
-- **Total Tests Verified**: **94 automated tests passed**.
+Verify that both frontend and backend are in a clean, development-ready state:
 
----
+```bash
+# Verify backend compilation
+mvn -f backend/pom.xml compile
 
-## 6. Known Limitations & Production Recommendations
+# Verify frontend TypeScript types
+npm --prefix mobile run typecheck
 
-1. **Teacher Registration**: In public demo mode, teacher registration is protected by a pre-shared cryptographic invitation code (`TEACHER_INVITATION_CODE`). In an enterprise deployment, this should be superseded by Single Sign-On (SAML 2.0 / OpenID Connect) mapped to school faculty Active Directory groups.
-2. **Push Notifications**: When points are awarded, mobile clients currently synchronize via optimistic updates and cache invalidation. A production release should incorporate WebSocket (STOMP) or Expo Push Notifications to notify students in real time when points are awarded by a teacher.
-3. **Database Caching**: Ranks are computed directly via database index count queries (`1 + COUNT(sp) WHERE sp.totalPoints > :points`), which guarantees `O(log N)` performance with zero memory overhead. For deployments exceeding 500,000 active students, a Redis sorted set (`ZADD`/`ZREVRANK`) can be added for sub-millisecond rank lookups.
+# Check mobile test runner
+npm --prefix mobile test
+```

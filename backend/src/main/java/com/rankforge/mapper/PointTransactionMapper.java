@@ -27,9 +27,6 @@ public class PointTransactionMapper {
                 teacherName,
                 transaction.getDeltaPoints(),
                 transaction.getReason(),
-                transaction.getCreatedAt()
-        );
+                transaction.getCreatedAt());
     }
 }
-
-

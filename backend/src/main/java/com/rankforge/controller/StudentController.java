@@ -2,6 +2,7 @@ package com.rankforge.controller;
 
 import com.rankforge.dto.response.PagedResponse;
 import com.rankforge.dto.response.PointTransactionResponse;
+import com.rankforge.dto.response.StudentAnalyticsResponse;
 import com.rankforge.dto.response.StudentDashboardResponse;
 import com.rankforge.dto.response.StudentProfileResponse;
 import com.rankforge.entity.User;
@@ -39,8 +40,8 @@ public class StudentController {
     }
 
     @GetMapping("/analytics")
-    public ResponseEntity<com.rankforge.dto.response.StudentAnalyticsResponse> getStudentAnalytics(@AuthenticationPrincipal User currentUser) {
-        com.rankforge.dto.response.StudentAnalyticsResponse response = studentService.getStudentAnalytics(currentUser);
+    public ResponseEntity<StudentAnalyticsResponse> getStudentAnalytics(@AuthenticationPrincipal User currentUser) {
+        StudentAnalyticsResponse response = studentService.getStudentAnalytics(currentUser);
         return ResponseEntity.ok(response);
     }
 

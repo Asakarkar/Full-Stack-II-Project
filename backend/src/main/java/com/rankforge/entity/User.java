@@ -129,5 +129,3 @@ public class User extends AuditedEntity implements UserDetails {
         return true;
     }
 }
-
-

@@ -28,8 +28,8 @@ public class TeacherServiceImpl implements TeacherService {
     private final StudentProfileMapper studentProfileMapper;
 
     public TeacherServiceImpl(StudentProfileRepository studentProfileRepository,
-                              PointTransactionRepository pointTransactionRepository,
-                              StudentProfileMapper studentProfileMapper) {
+            PointTransactionRepository pointTransactionRepository,
+            StudentProfileMapper studentProfileMapper) {
         this.studentProfileRepository = studentProfileRepository;
         this.pointTransactionRepository = pointTransactionRepository;
         this.studentProfileMapper = studentProfileMapper;
@@ -53,8 +53,7 @@ public class TeacherServiceImpl implements TeacherService {
                 totalTransactions,
                 todayTransactions,
                 todayAwardedPoints,
-                todayDeductedPoints
-        );
+                todayDeductedPoints);
     }
 
     @Override
@@ -67,7 +66,8 @@ public class TeacherServiceImpl implements TeacherService {
             throw new BadRequestException("Page size must be between 1 and 100");
         }
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "totalPoints").and(Sort.by(Sort.Direction.ASC, "id")));
+        Pageable pageable = PageRequest.of(page, size,
+                Sort.by(Sort.Direction.DESC, "totalPoints").and(Sort.by(Sort.Direction.ASC, "id")));
         String normalizedSearch = (search != null && !search.isBlank()) ? search.trim() : null;
 
         Page<StudentProfile> studentPage = studentProfileRepository.searchStudents(normalizedSearch, pageable);

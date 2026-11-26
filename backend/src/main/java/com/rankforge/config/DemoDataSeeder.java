@@ -23,63 +23,68 @@ import org.springframework.transaction.annotation.Transactional;
 @ConditionalOnProperty(prefix = "rankforge", name = "seed-demo-data", havingValue = "true", matchIfMissing = true)
 public class DemoDataSeeder implements CommandLineRunner {
 
-    private static final Logger log = LoggerFactory.getLogger(DemoDataSeeder.class);
+        private static final Logger log = LoggerFactory.getLogger(DemoDataSeeder.class);
 
-    private final UserRepository userRepository;
-    private final StudentProfileRepository studentProfileRepository;
-    private final PointTransactionRepository pointTransactionRepository;
-    private final PasswordEncoder passwordEncoder;
+        private final UserRepository userRepository;
+        private final StudentProfileRepository studentProfileRepository;
+        private final PointTransactionRepository pointTransactionRepository;
+        private final PasswordEncoder passwordEncoder;
 
-    public DemoDataSeeder(UserRepository userRepository,
-                          StudentProfileRepository studentProfileRepository,
-                          PointTransactionRepository pointTransactionRepository,
-                          PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.studentProfileRepository = studentProfileRepository;
-        this.pointTransactionRepository = pointTransactionRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
-
-    @Override
-    @Transactional
-    public void run(String... args) {
-        if (userRepository.count() > 0) {
-            log.info("Database already contains user records. Skipping demo data seeding.");
-            return;
+        public DemoDataSeeder(UserRepository userRepository,
+                        StudentProfileRepository studentProfileRepository,
+                        PointTransactionRepository pointTransactionRepository,
+                        PasswordEncoder passwordEncoder) {
+                this.userRepository = userRepository;
+                this.studentProfileRepository = studentProfileRepository;
+                this.pointTransactionRepository = pointTransactionRepository;
+                this.passwordEncoder = passwordEncoder;
         }
 
-        log.info("Seeding RankForge live demo development accounts...");
+        @Override
+        @Transactional
+        public void run(String... args) {
+                if (userRepository.count() > 0) {
+                        log.info("Database already contains user records. Skipping demo data seeding.");
+                        return;
+                }
 
-        // 1. Provision Teacher Account
-        User teacher = new User(
-                "Professor Eleanor Davis",
-                "teacher@rankforge.edu",
-                passwordEncoder.encode("Teacher123!"),
-                Role.TEACHER
-        );
-        userRepository.save(teacher);
+                log.info("Seeding RankForge live demo development accounts...");
 
-        // 2. Provision 5 Seeded Students
-        seedStudent("Alice Vance", "alice@rankforge.edu", "Student123!", 120L, teacher, "High performance in Software Architecture project");
-        seedStudent("Bob Martinez", "bob@rankforge.edu", "Student123!", 120L, teacher, "Exceptional academic leadership & peer mentoring (Tie with Alice)");
-        seedStudent("Charlie Chen", "charlie@rankforge.edu", "Student123!", 95L, teacher, "Consistent homework excellence and lab results");
-        seedStudent("Diana Prince", "diana@rankforge.edu", "Student123!", 50L, teacher, "Active participation in academic hackathon");
-        seedStudent("Ethan Hunt", "ethan@rankforge.edu", "Student123!", 15L, teacher, "First lab submission and quiz completion");
+                // 1. Provision Teacher Account
+                User teacher = new User(
+                                "Professor Eleanor Davis",
+                                "teacher@rankforge.edu",
+                                passwordEncoder.encode("Teacher123!"),
+                                Role.TEACHER);
+                userRepository.save(teacher);
 
-        log.info("Successfully seeded demo teacher (teacher@rankforge.edu) and 5 student accounts.");
-    }
+                // 2. Provision 5 Seeded Students
+                seedStudent("Alice Vance", "alice@rankforge.edu", "Student123!", 120L, teacher,
+                                "High performance in Software Architecture project");
+                seedStudent("Bob Martinez", "bob@rankforge.edu", "Student123!", 120L, teacher,
+                                "Exceptional academic leadership & peer mentoring (Tie with Alice)");
+                seedStudent("Charlie Chen", "charlie@rankforge.edu", "Student123!", 95L, teacher,
+                                "Consistent homework excellence and lab results");
+                seedStudent("Diana Prince", "diana@rankforge.edu", "Student123!", 50L, teacher,
+                                "Active participation in academic hackathon");
+                seedStudent("Ethan Hunt", "ethan@rankforge.edu", "Student123!", 15L, teacher,
+                                "First lab submission and quiz completion");
 
-    private void seedStudent(String name, String email, String rawPassword, Long points, User teacher, String reason) {
-        User user = new User(name, email, passwordEncoder.encode(rawPassword), Role.STUDENT);
-        userRepository.save(user);
-
-        StudentProfile profile = new StudentProfile(user);
-        profile.setTotalPoints(points);
-        studentProfileRepository.save(profile);
-
-        if (points > 0) {
-            PointTransaction tx = new PointTransaction(profile, teacher, points.intValue(), reason);
-            pointTransactionRepository.save(tx);
+                log.info("Successfully seeded demo teacher (teacher@rankforge.edu) and 5 student accounts.");
         }
-    }
+
+        private void seedStudent(String name, String email, String rawPassword, Long points, User teacher,
+                        String reason) {
+                User user = new User(name, email, passwordEncoder.encode(rawPassword), Role.STUDENT);
+                userRepository.save(user);
+
+                StudentProfile profile = new StudentProfile(user);
+                profile.setTotalPoints(points);
+                studentProfileRepository.save(profile);
+
+                if (points > 0) {
+                        PointTransaction tx = new PointTransaction(profile, teacher, points.intValue(), reason);
+                        pointTransactionRepository.save(tx);
+                }
+        }
 }

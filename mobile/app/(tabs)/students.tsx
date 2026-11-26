@@ -102,25 +102,67 @@ export default function StudentsScreen() {
           </Pressable>;
         })}
       </View>
-      <View style={styles.resultHeader}><View style={styles.resultTitle}><Users size={16} color={colors.primary} /><Text style={{ color: colors.text, fontSize: 13, fontWeight: "700" }}>Learner directory</Text></View><Text style={{ color: colors.muted, fontSize: 11 }}>{data ? `${data.total} results` : ""}</Text></View>
+      <View style={styles.resultHeader}>
+        <View style={styles.resultTitle}>
+          <Users size={16} color={colors.primary} />
+          <Text style={{ color: colors.text, fontSize: 13, fontWeight: "700" }}>Learner directory</Text>
+        </View>
+        <Text style={{ color: colors.muted, fontSize: 11 }}>{data ? `${data.total} results` : ""}</Text>
+      </View>
     </View>
   );
 
-  if (isLoading) return <Screen><PageHeader title="Students" subtitle="Find your learners and follow their progress." /><LoadingState label="Finding your students…" /></Screen>;
-  if (isError) return <Screen><PageHeader title="Students" subtitle="Find your learners and follow their progress." /><ErrorState message={getErrorMessage(error, "Unable to load students.")} onRetry={refetch} /></Screen>;
+  if (isLoading) {
+    return (
+      <Screen>
+        <PageHeader title="Students" subtitle="Find your learners and follow their progress." />
+        <LoadingState label="Finding your students…" />
+      </Screen>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Screen>
+        <PageHeader title="Students" subtitle="Find your learners and follow their progress." />
+        <ErrorState message={getErrorMessage(error, "Unable to load students.")} onRetry={refetch} />
+      </Screen>
+    );
+  }
+
   return (
     <Screen scroll={false} style={styles.screen}>
       <FlatList
         data={data?.items ?? []}
         keyExtractor={(item) => item.id}
         ListHeaderComponent={header}
-        ListEmptyComponent={<EmptyState title={criteria.search || criteria.grade || criteria.minPoints !== null || criteria.maxPoints !== null ? "No students match these filters" : "Your directory is empty"} message={criteria.search || criteria.grade || criteria.minPoints !== null || criteria.maxPoints !== null ? "Try changing the search or filters." : "Students connected to your class will appear here."} />}
+        ListEmptyComponent={
+          <EmptyState
+            title={
+              criteria.search || criteria.grade || criteria.minPoints !== null || criteria.maxPoints !== null
+                ? "No students match these filters"
+                : "Your directory is empty"
+            }
+            message={
+              criteria.search || criteria.grade || criteria.minPoints !== null || criteria.maxPoints !== null
+                ? "Try changing the search or filters."
+                : "Students connected to your class will appear here."
+            }
+          />
+        }
         ItemSeparatorComponent={() => <View style={[styles.separator, { backgroundColor: colors.border }]} />}
         renderItem={({ item }) => (
-          <Pressable accessibilityRole="button" accessibilityLabel={`View ${item.displayName}`} onPress={() => router.push({
-            pathname: "/teacher/student/[studentId]",
-            params: { studentId: item.id, name: item.displayName, grade: item.grade ?? "" },
-          })} style={({ pressed }) => [styles.studentItem, { backgroundColor: colors.surface, opacity: pressed ? 0.75 : 1 }]}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`View ${item.displayName}`}
+            onPress={() =>
+              router.push({
+                pathname: "/teacher/student/[studentId]",
+                params: { studentId: item.id, name: item.displayName, grade: item.grade ?? "" },
+              })
+            }
+            style={({ pressed }) => [styles.studentItem, { backgroundColor: colors.surface, opacity: pressed ? 0.75 : 1 }]}
+          >
             <StudentRow student={item} />
             {!!item.grade && <Text style={[styles.grade, { color: colors.muted }]}>{item.grade}</Text>}
           </Pressable>

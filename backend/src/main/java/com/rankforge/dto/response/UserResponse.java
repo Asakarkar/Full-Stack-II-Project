@@ -11,8 +11,5 @@ public record UserResponse(
         String email,
         Role role,
         Instant createdAt,
-        Instant updatedAt
-) {
+        Instant updatedAt) {
 }
-
-

@@ -2,14 +2,13 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { apiRequest } from "@/lib/apiClient";
 import type { PointTransaction } from "@/lib/types";
 import { applyPointAwardResult, refreshLeaderboard } from "./leaderboardSlice";
-import type { RootState } from "./index";
+import type { AppDispatch, RootState } from "./index";
 
 export interface PointsState {
   submitting: boolean;
   loading: boolean;
   error: string | null;
   lastTransaction: PointTransaction | null;
-  // Pagination & filter state for teacher/student point history
   page: number;
   limit: number;
   sort: "createdAt" | "amount" | "type";
@@ -33,15 +32,10 @@ export interface AwardPointsParams {
   reason: string;
 }
 
-/**
- * Award or deduct points as teacher.
- * Enforces duplicate submission prevention, immediate optimistic score update,
- * and leaderboard invalidation/refresh to maintain database-ranked global ordering.
- */
 export const awardPoints = createAsyncThunk<
   PointTransaction,
   AwardPointsParams,
-  { state: RootState; rejectValue: string }
+  { dispatch: AppDispatch; state: RootState; rejectValue: string }
 >("points/awardPoints", async ({ studentId, points, reason }, { getState, dispatch, rejectWithValue }) => {
   const state = getState();
   if (state.points.submitting) {
@@ -61,7 +55,6 @@ export const awardPoints = createAsyncThunk<
       },
     });
 
-    // 1. Immediately update cached student score in UI
     dispatch(
       applyPointAwardResult({
         studentId,
@@ -70,9 +63,7 @@ export const awardPoints = createAsyncThunk<
       })
     );
 
-    // 2. Invalidate / refresh leaderboard so database competition ranks & tie breaks recalculate
-    void (dispatch as (a: unknown) => Promise<unknown>)(refreshLeaderboard());
-
+    void dispatch(refreshLeaderboard());
     return response;
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : "Failed to record point transaction";

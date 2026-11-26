@@ -102,7 +102,6 @@ export function PointAwardSheet({
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={[styles.backdrop, isTabletOrDesktop && styles.backdropTablet]}>
         <Card style={[styles.sheet, { backgroundColor: colors.surface, borderColor: colors.border }, isTabletOrDesktop && styles.sheetTablet]}>
-          {/* Header */}
           <View style={styles.sheetHeader}>
             <View style={styles.studentInfo}>
               <Avatar name={student.displayName} size={40} />
@@ -118,7 +117,6 @@ export function PointAwardSheet({
             </Pressable>
           </View>
 
-          {/* Mode Switcher: Award vs Deduct */}
           <View style={styles.modeRow}>
             <Pressable
               accessibilityRole="button"
@@ -150,7 +148,6 @@ export function PointAwardSheet({
             </Pressable>
           </View>
 
-          {/* Preset Buttons */}
           <Text style={[styles.fieldLabel, { color: colors.muted }]}>Select Amount</Text>
           <View style={styles.presetRow}>
             {PRESET_AMOUNTS.map((amt) => {
@@ -175,7 +172,6 @@ export function PointAwardSheet({
             })}
           </View>
 
-          {/* Custom Amount */}
           <Field
             label="Custom Value"
             placeholder="Enter points (e.g. 15)"
@@ -185,7 +181,6 @@ export function PointAwardSheet({
             maxLength={5}
           />
 
-          {/* Mandatory Reason */}
           <Field
             label="Reason for Adjustment *"
             placeholder="e.g. Excellent presentation, teamwork..."
@@ -200,14 +195,12 @@ export function PointAwardSheet({
             {reason.trim().length === 0 ? "Reason is required to update student ledger" : `${250 - reason.length} characters remaining`}
           </Text>
 
-          {/* Error Banner */}
           {!!error && (
             <Text accessibilityRole="alert" style={[styles.errorText, { color: colors.danger }]}>
               {error}
             </Text>
           )}
 
-          {/* Success Banner */}
           {!!successToast && (
             <View style={[styles.successBanner, { backgroundColor: `${colors.accent}15`, borderColor: colors.accent }]}>
               <CheckCircle2 size={18} color={colors.accent} />
@@ -215,7 +208,6 @@ export function PointAwardSheet({
             </View>
           )}
 
-          {/* Action Button */}
           <Button
             title={reviewing ? "Confirming…" : `Review ${mode === "award" ? `+${parsedAmount || 0}` : `-${parsedAmount || 0}`} Points`}
             onPress={() => setReviewing(true)}
@@ -223,7 +215,6 @@ export function PointAwardSheet({
             loading={submitting}
           />
 
-          {/* Confirmation Review Modal */}
           <Modal visible={reviewing} transparent animationType="fade" onRequestClose={() => setReviewing(false)}>
             <View style={styles.reviewBackdrop}>
               <Card style={[styles.reviewCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>

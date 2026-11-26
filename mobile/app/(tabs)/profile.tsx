@@ -82,8 +82,15 @@ export default function ProfileScreen() {
         <SectionTitle title="Appearance" />
         <Card style={styles.menuCard}>
           <View style={styles.themeRow}>
-            <View style={[styles.menuIcon, { backgroundColor: colors.primarySoft }]}>{mode === "dark" ? <Moon size={17} color={colors.primary} /> : <Sun size={17} color={colors.primary} />}</View>
-            <View style={{ flex: 1 }}><Text style={[styles.menuTitle, { color: colors.text }]}>Theme</Text><Text style={[styles.menuCaption, { color: colors.muted }]}>{preference === "system" ? "System default" : `${preference[0].toUpperCase()}${preference.slice(1)} mode`}</Text></View>
+            <View style={[styles.menuIcon, { backgroundColor: colors.primarySoft }]}>
+              {mode === "dark" ? <Moon size={17} color={colors.primary} /> : <Sun size={17} color={colors.primary} />}
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.menuTitle, { color: colors.text }]}>Theme</Text>
+              <Text style={[styles.menuCaption, { color: colors.muted }]}>
+                {preference === "system" ? "System default" : `${preference[0].toUpperCase()}${preference.slice(1)} mode`}
+              </Text>
+            </View>
             <Button title="Change" variant="secondary" onPress={cycleTheme} />
           </View>
         </Card>
@@ -96,11 +103,16 @@ export default function ProfileScreen() {
 
 function MenuRow({ icon, title, caption, onPress }: { icon: React.ReactNode; title: string; caption: string; onPress: () => void }) {
   const { colors } = useTheme();
-  return <Pressable accessibilityRole="button" onPress={onPress} style={styles.menuRow}>
-    <View style={[styles.menuIcon, { backgroundColor: colors.raised }]}>{icon}</View>
-    <View style={{ flex: 1 }}><Text style={[styles.menuTitle, { color: colors.text }]}>{title}</Text><Text style={[styles.menuCaption, { color: colors.muted }]}>{caption}</Text></View>
-    <ChevronRight size={17} color={colors.muted} />
-  </Pressable>;
+  return (
+    <Pressable accessibilityRole="button" onPress={onPress} style={styles.menuRow}>
+      <View style={[styles.menuIcon, { backgroundColor: colors.raised }]}>{icon}</View>
+      <View style={{ flex: 1 }}>
+        <Text style={[styles.menuTitle, { color: colors.text }]}>{title}</Text>
+        <Text style={[styles.menuCaption, { color: colors.muted }]}>{caption}</Text>
+      </View>
+      <ChevronRight size={17} color={colors.muted} />
+    </Pressable>
+  );
 }
 
 function formatDate(value: string) {

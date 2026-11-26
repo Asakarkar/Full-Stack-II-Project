@@ -104,7 +104,6 @@ export default function LeaderboardScreen() {
         subtitle={isTeacher ? "Academic evaluation & merit recognition" : "Celebrate your progress, one achievement at a time."}
       />
 
-      {/* View Switcher: Rankings vs Recent Activity Feed */}
       <View style={styles.tabSwitcher}>
         <Pressable
           accessibilityRole="button"
@@ -140,7 +139,6 @@ export default function LeaderboardScreen() {
         </Pressable>
       </View>
 
-      {/* STUDENT'S PINNED PERSONAL RANK CARD */}
       {isStudent && (
         <Card style={[styles.personalCard, { backgroundColor: colors.surface, borderColor: colors.primary }]}>
           <View style={styles.personalTopRow}>
@@ -160,7 +158,6 @@ export default function LeaderboardScreen() {
             </View>
           </View>
 
-          {/* Motivational Milestone Progress Bar */}
           {personalMilestone.nextTier && (
             <View style={styles.milestoneWrap}>
               <View style={styles.milestoneLabels}>
@@ -185,10 +182,8 @@ export default function LeaderboardScreen() {
         </Card>
       )}
 
-      {/* TAB CONTENT: RANKINGS */}
       {activeTab === "ranks" && (
         <>
-          {/* ANIMATED TOP-THREE PODIUM */}
           {topThree.length >= 2 && !loading && (
             <Animated.View entering={FadeIn.duration(450)} style={[styles.podiumContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
               <View style={styles.podiumHeader}>
@@ -197,7 +192,6 @@ export default function LeaderboardScreen() {
               </View>
 
               <View style={styles.podiumStage}>
-                {/* 2nd Place: Silver (Left) */}
                 {silver && (
                   <Animated.View entering={FadeInUp.duration(400).delay(80)} style={[styles.podiumColumn, isTabletOrDesktop && styles.podiumColumnTablet]}>
                     <Avatar name={silver.displayName} size={isSmallPhone ? 38 : 46} />
@@ -215,7 +209,6 @@ export default function LeaderboardScreen() {
                   </Animated.View>
                 )}
 
-                {/* 1st Place: Gold (Center - Tallest) */}
                 {gold && (
                   <Animated.View entering={FadeInUp.duration(450)} style={[styles.podiumColumn, isTabletOrDesktop && styles.podiumColumnTablet]}>
                     <View style={styles.crownWrapper}>
@@ -236,7 +229,6 @@ export default function LeaderboardScreen() {
                   </Animated.View>
                 )}
 
-                {/* 3rd Place: Bronze (Right) */}
                 {bronze && (
                   <Animated.View entering={FadeInUp.duration(400).delay(160)} style={[styles.podiumColumn, isTabletOrDesktop && styles.podiumColumnTablet]}>
                     <Avatar name={bronze.displayName} size={isSmallPhone ? 36 : 42} />
@@ -257,7 +249,6 @@ export default function LeaderboardScreen() {
             </Animated.View>
           )}
 
-          {/* Search Bar & Sorting Controls */}
           <View style={[styles.searchWrap, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <Search size={17} color={colors.muted} />
             <TextInput
@@ -283,7 +274,6 @@ export default function LeaderboardScreen() {
             })}
           </View>
 
-          {/* SKELETON LOADERS / ERROR / LIST */}
           {loading && !students.length ? (
             <LoadingState label="Calculating real-time academic rankings…" />
           ) : error && !students.length ? (
@@ -316,7 +306,6 @@ export default function LeaderboardScreen() {
                           ]}
                         >
                           <View style={styles.cardMain}>
-                            {/* Rank Indicator */}
                             <View
                               style={[
                                 styles.rankIndicator,
@@ -349,7 +338,6 @@ export default function LeaderboardScreen() {
                               </Text>
                             </View>
 
-                            {/* Score & Teacher Award Button */}
                             <View style={styles.cardActions}>
                               <View style={styles.scoreBox}>
                                 <Text style={[styles.pointsValue, { color: colors.primary }]}>
@@ -383,7 +371,6 @@ export default function LeaderboardScreen() {
                 />
               )}
 
-              {/* Server-Side Pagination Controls */}
               {pagination.totalPages > 1 && (
                 <Pagination
                   page={pagination.page + 1}
@@ -405,7 +392,6 @@ export default function LeaderboardScreen() {
         </>
       )}
 
-      {/* TAB CONTENT: RECENT ACTIVITY FEED */}
       {activeTab === "activity" && (
         <View style={styles.activityContainer}>
           <View style={styles.listHeader}>
@@ -455,7 +441,6 @@ export default function LeaderboardScreen() {
         </View>
       )}
 
-      {/* TEACHER POINT AWARD BOTTOM SHEET */}
       <PointAwardSheet
         visible={!!selectedStudentForAward}
         student={selectedStudentForAward}

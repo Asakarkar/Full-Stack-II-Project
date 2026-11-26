@@ -87,27 +87,78 @@ export default function DashboardScreen() {
           <View style={styles.section}>
             <SectionTitle
               title={teacher ? "Leaderboard preview" : "Top learners"}
-              action={<Pressable onPress={() => router.push("/(tabs)/leaderboard")}><Text style={{ color: colors.primary, fontSize: 12, fontWeight: "700" }}>View all</Text></Pressable>}
+              action={
+                <Pressable onPress={() => router.push("/(tabs)/leaderboard")}>
+                  <Text style={{ color: colors.primary, fontSize: 12, fontWeight: "700" }}>View all</Text>
+                </Pressable>
+              }
             />
-            {leaderboard.isError ? <ErrorState message={getErrorMessage(leaderboard.error, "Leaderboard preview is unavailable.")} onRetry={leaderboard.refetch} /> :
-              leaderboard.isLoading ? <LoadingState label="Loading leaderboard…" /> :
-                leaderboard.data?.items.length ? <Card>{leaderboard.data.items.map((entry, index) => <View key={entry.studentId} style={{ gap: 12 }}>{index > 0 && <View style={[styles.divider, { backgroundColor: colors.border }]} />}<StudentRow student={entry} /></View>)}</Card> :
-                  <EmptyState title="Rankings are getting started" message="Learners will appear here as they earn points." />}
+            {leaderboard.isError ? (
+              <ErrorState message={getErrorMessage(leaderboard.error, "Leaderboard preview is unavailable.")} onRetry={leaderboard.refetch} />
+            ) : leaderboard.isLoading ? (
+              <LoadingState label="Loading leaderboard…" />
+            ) : leaderboard.data?.items.length ? (
+              <Card>
+                {leaderboard.data.items.map((entry, index) => (
+                  <View key={entry.studentId} style={{ gap: 12 }}>
+                    {index > 0 && <View style={[styles.divider, { backgroundColor: colors.border }]} />}
+                    <StudentRow student={entry} />
+                  </View>
+                ))}
+              </Card>
+            ) : (
+              <EmptyState title="Rankings are getting started" message="Learners will appear here as they earn points." />
+            )}
           </View>
 
           <View style={styles.section}>
-            <SectionTitle title={teacher ? "Recent point activity" : "Recent activity"} action={!teacher ? <Pressable onPress={() => router.push("/(tabs)/points")}><Text style={{ color: colors.primary, fontSize: 12, fontWeight: "700" }}>History</Text></Pressable> : undefined} />
-            {activityQuery.isLoading ? <LoadingState label="Loading recent activity…" /> :
-              activityQuery.isError ? <ErrorState message={teacher && isNotFoundError(activityQuery.error) ? "Recent class activity is not available yet. Student management and points actions remain available." : getErrorMessage(activityQuery.error, teacher ? "Recent class activity is not available yet." : "Your point history is not available right now.")} onRetry={activityQuery.refetch} /> :
-                activityQuery.data?.items.length ? <Card>{activityQuery.data.items.map((entry, index) => <View key={entry.id} style={{ gap: 12 }}>
-                  {index > 0 && <View style={[styles.divider, { backgroundColor: colors.border }]} />}
-                  <View style={styles.activity}>
-                    <View style={[styles.activityIcon, { backgroundColor: entry.type === "AWARD" ? `${colors.accent}20` : `${colors.warning}20` }]}><Sparkles size={15} color={entry.type === "AWARD" ? colors.accent : colors.warning} /></View>
-                    <View style={{ flex: 1 }}><Text style={[styles.activityTitle, { color: colors.text }]}>{entry.reason}</Text><Text style={[styles.activityDate, { color: colors.muted }]}>{teacher ? `${entry.studentName} · ${entry.actorName} · ` : ""}{formatDate(entry.createdAt)}</Text></View>
-                    <Text style={[styles.activityPoints, { color: isPositiveEntry(entry.type) ? colors.accent : colors.danger }]}>{isPositiveEntry(entry.type) ? "+" : "−"}{Math.abs(entry.amount)}</Text>
+            <SectionTitle
+              title={teacher ? "Recent point activity" : "Recent activity"}
+              action={
+                !teacher ? (
+                  <Pressable onPress={() => router.push("/(tabs)/points")}>
+                    <Text style={{ color: colors.primary, fontSize: 12, fontWeight: "700" }}>History</Text>
+                  </Pressable>
+                ) : undefined
+              }
+            />
+            {activityQuery.isLoading ? (
+              <LoadingState label="Loading recent activity…" />
+            ) : activityQuery.isError ? (
+              <ErrorState
+                message={
+                  teacher && isNotFoundError(activityQuery.error)
+                    ? "Recent class activity is not available yet. Student management and points actions remain available."
+                    : getErrorMessage(activityQuery.error, teacher ? "Recent class activity is not available yet." : "Your point history is not available right now.")
+                }
+                onRetry={activityQuery.refetch}
+              />
+            ) : activityQuery.data?.items.length ? (
+              <Card>
+                {activityQuery.data.items.map((entry, index) => (
+                  <View key={entry.id} style={{ gap: 12 }}>
+                    {index > 0 && <View style={[styles.divider, { backgroundColor: colors.border }]} />}
+                    <View style={styles.activity}>
+                      <View style={[styles.activityIcon, { backgroundColor: entry.type === "AWARD" ? `${colors.accent}20` : `${colors.warning}20` }]}>
+                        <Sparkles size={15} color={entry.type === "AWARD" ? colors.accent : colors.warning} />
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={[styles.activityTitle, { color: colors.text }]}>{entry.reason}</Text>
+                        <Text style={[styles.activityDate, { color: colors.muted }]}>
+                          {teacher ? `${entry.studentName} · ${entry.actorName} · ` : ""}
+                          {formatDate(entry.createdAt)}
+                        </Text>
+                      </View>
+                      <Text style={[styles.activityPoints, { color: isPositiveEntry(entry.type) ? colors.accent : colors.danger }]}>
+                        {isPositiveEntry(entry.type) ? "+" : "−"}{Math.abs(entry.amount)}
+                      </Text>
+                    </View>
                   </View>
-                </View>)}</Card> :
-                  <EmptyState title="No activity yet" message="New point activity will appear here once recorded." />}
+                ))}
+              </Card>
+            ) : (
+              <EmptyState title="No activity yet" message="New point activity will appear here once recorded." />
+            )}
           </View>
         </>
       )}

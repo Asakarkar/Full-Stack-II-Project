@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { apiRequest } from "@/lib/apiClient";
 import type { LeaderboardEntry, PageEnvelope, PaginationState, PointTransaction } from "@/lib/types";
-import type { RootState } from "./index";
+import type { AppDispatch, RootState } from "./index";
 
 export interface LeaderboardState {
   students: LeaderboardEntry[];
@@ -87,9 +87,6 @@ function normalizeLeaderboardEntry(raw: Record<string, unknown>, index: number, 
   };
 }
 
-/**
- * Fetch authenticated student's individual rank even if outside the current visible page.
- */
 export const fetchMyRank = createAsyncThunk<
   LeaderboardEntry | null,
   void,
@@ -103,7 +100,6 @@ export const fetchMyRank = createAsyncThunk<
     const raw = await apiRequest<Record<string, unknown>>("/leaderboard/me");
     return normalizeLeaderboardEntry(raw, 0, 0, 1);
   } catch {
-    // If not found or endpoint unavailable, fallback silently
     try {
       const profile = await apiRequest<Record<string, unknown>>("/students/me");
       const rank = typeof profile.rank === "number" ? profile.rank : 1;
@@ -124,9 +120,6 @@ export const fetchMyRank = createAsyncThunk<
   }
 });
 
-/**
- * Fetch recent activity feed backed by database point_transactions ledger records.
- */
 export const fetchActivityFeed = createAsyncThunk<
   PointTransaction[],
   { page?: number; size?: number } | undefined,
@@ -155,9 +148,6 @@ export const fetchActivityFeed = createAsyncThunk<
   }
 });
 
-/**
- * Fetch leaderboard page with server-side pagination, database competition rank, and deterministic UUID tie-breaks.
- */
 export const fetchLeaderboard = createAsyncThunk<
   {
     entries: LeaderboardEntry[];
@@ -167,7 +157,7 @@ export const fetchLeaderboard = createAsyncThunk<
     reset: boolean;
   },
   FetchLeaderboardParams | undefined,
-  { state: RootState; rejectValue: string }
+  { dispatch: AppDispatch; state: RootState; rejectValue: string }
 >("leaderboard/fetchLeaderboard", async (params = {}, { getState, dispatch, rejectWithValue }) => {
   const state = getState();
   const page = params.page !== undefined ? params.page : state.leaderboard.pagination.page;
@@ -176,9 +166,8 @@ export const fetchLeaderboard = createAsyncThunk<
   const reset = params.reset ?? page === 0;
 
   try {
-    // If student is authenticated, fetch their rank in parallel
     if (state.auth.user?.role === "STUDENT" && !state.leaderboard.myRankEntry) {
-      void (dispatch as (a: unknown) => Promise<unknown>)(fetchMyRank());
+      void dispatch(fetchMyRank());
     }
 
     const response = await apiRequest<PageEnvelope<Record<string, unknown>>>("/leaderboard", {
@@ -218,33 +207,27 @@ export const fetchLeaderboard = createAsyncThunk<
   }
 });
 
-/**
- * Refresh leaderboard from page 0 and synchronize personal rank and activity.
- */
-export const refreshLeaderboard = createAsyncThunk(
+export const refreshLeaderboard = createAsyncThunk<void, void, { dispatch: AppDispatch }>(
   "leaderboard/refreshLeaderboard",
   async (_, { dispatch }) => {
     await Promise.all([
-      (dispatch as (a: unknown) => Promise<unknown>)(fetchLeaderboard({ page: 0, reset: true })),
-      (dispatch as (a: unknown) => Promise<unknown>)(fetchMyRank()),
-      (dispatch as (a: unknown) => Promise<unknown>)(fetchActivityFeed()),
+      dispatch(fetchLeaderboard({ page: 0, reset: true })),
+      dispatch(fetchMyRank()),
+      dispatch(fetchActivityFeed()),
     ]);
   }
 );
 
-/**
- * Fetch next page and append to student list.
- */
-export const fetchNextPage = createAsyncThunk(
+export const fetchNextPage = createAsyncThunk<void, void, { dispatch: AppDispatch; state: RootState }>(
   "leaderboard/fetchNextPage",
   async (_, { getState, dispatch }) => {
-    const state = getState() as RootState;
+    const state = getState();
     const { pagination, loading, refreshing, activeSort } = state.leaderboard;
     if (loading || refreshing || pagination.isLast) {
       return;
     }
     const nextPage = pagination.page + 1;
-    await (dispatch as (a: unknown) => Promise<unknown>)(
+    await dispatch(
       fetchLeaderboard({ page: nextPage, direction: activeSort.direction, reset: false })
     );
   }
